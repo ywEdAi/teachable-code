@@ -1,0 +1,228 @@
+{
+ "timeline": [
+  {
+   "type": "spotlight",
+   "id": "a0",
+   "startMs": 0,
+   "durationMs": 5000,
+   "blocking": false,
+   "text": "t-b3"
+  },
+  {
+   "type": "speech",
+   "id": "a1",
+   "startMs": 0,
+   "durationMs": 4500,
+   "blocking": true,
+   "text": "对称轴是过顶点的那条竖直线，公式是 x = -b/(2a)。"
+  },
+  {
+   "type": "wb_open",
+   "id": "__implicit_wb_open__",
+   "startMs": 4500,
+   "durationMs": 2000,
+   "blocking": true,
+   "text": ""
+  },
+  {
+   "type": "wb_draw_latex",
+   "id": "a2",
+   "startMs": 6500,
+   "durationMs": 800,
+   "blocking": true,
+   "text": "x=-\\frac{b}{2a}"
+  },
+  {
+   "type": "speech",
+   "id": "a3",
+   "startMs": 7300,
+   "durationMs": 2000,
+   "blocking": true,
+   "text": "我们在白板上把它推导出来。"
+  },
+  {
+   "type": "laser",
+   "id": "a4",
+   "startMs": 9300,
+   "durationMs": 5000,
+   "blocking": false,
+   "text": "l-1"
+  },
+  {
+   "type": "speech",
+   "id": "a5",
+   "startMs": 9300,
+   "durationMs": 2000,
+   "blocking": true,
+   "text": "看这个一般式。"
+  },
+  {
+   "type": "discussion",
+   "id": "a6",
+   "startMs": 11300,
+   "durationMs": 8000,
+   "blocking": true,
+   "text": "为什么 a 决定开口方向？"
+  }
+ ],
+ "conflicts": "\n## ⚠ Layout Conflicts Detected (computed from current whiteboard JSON)\nThe following geometric conflicts exist on the board RIGHT NOW. Each entry is a real visible problem on the current board. You MUST address these before adding new content — either wb_delete one of the conflicting elements, or wb_clear and start fresh:\n  - OVERLAP: text \"树荫减少太阳辐射\"[w1] and latex \"x=-b/2a\"[w2] share 33% of the smaller one's area — they sit on top of each other.\n  - OUT OF CANVAS: shape[w3] extends past right edge by 100px, bottom edge by 37px — content is clipped.\n",
+ "wb": [
+  {
+   "id": "w1",
+   "type": "text",
+   "left": 80,
+   "top": 120,
+   "width": 420,
+   "height": 60,
+   "content": "树荫减少太阳辐射"
+  },
+  {
+   "id": "w2",
+   "type": "latex",
+   "left": 300,
+   "top": 140,
+   "width": 300,
+   "height": 80,
+   "latex": "x=-b/2a"
+  },
+  {
+   "id": "w3",
+   "type": "shape",
+   "left": 900,
+   "top": 480,
+   "width": 200,
+   "height": 120
+  }
+ ],
+ "agents": [
+  {
+   "id": "default-1",
+   "name": "AI teacher",
+   "role": "teacher",
+   "priority": 10,
+   "persona": "You are the lead teacher of this classroom. You teach with clarity, warmth, and genuine en",
+   "allowed": [
+    "spotlight",
+    "laser",
+    "play_video",
+    "wb_open",
+    "wb_close",
+    "wb_draw_text",
+    "wb_draw_shape",
+    "wb_draw_chart",
+    "wb_draw_latex",
+    "wb_draw_table",
+    "wb_draw_line",
+    "wb_draw_code",
+    "wb_edit_code",
+    "wb_clear",
+    "wb_delete"
+   ]
+  },
+  {
+   "id": "default-2",
+   "name": "AI助教",
+   "role": "assistant",
+   "priority": 7,
+   "persona": "You are the teaching assistant. You support the lead teacher by filling in gaps, answering",
+   "allowed": [
+    "wb_open",
+    "wb_close",
+    "wb_draw_text",
+    "wb_draw_shape",
+    "wb_draw_chart",
+    "wb_draw_latex",
+    "wb_draw_table",
+    "wb_draw_line",
+    "wb_draw_code",
+    "wb_edit_code",
+    "wb_clear",
+    "wb_delete"
+   ]
+  },
+  {
+   "id": "default-3",
+   "name": "显眼包",
+   "role": "student",
+   "priority": 4,
+   "persona": "You are the class clown — the student everyone notices. You bring energy and laughter to t",
+   "allowed": [
+    "wb_open",
+    "wb_close",
+    "wb_draw_text",
+    "wb_draw_shape",
+    "wb_draw_chart",
+    "wb_draw_latex",
+    "wb_draw_table",
+    "wb_draw_line",
+    "wb_draw_code",
+    "wb_edit_code",
+    "wb_clear",
+    "wb_delete"
+   ]
+  },
+  {
+   "id": "default-4",
+   "name": "好奇宝宝",
+   "role": "student",
+   "priority": 5,
+   "persona": "You are the endlessly curious student. You always have a question — and your questions oft",
+   "allowed": [
+    "wb_open",
+    "wb_close",
+    "wb_draw_text",
+    "wb_draw_shape",
+    "wb_draw_chart",
+    "wb_draw_latex",
+    "wb_draw_table",
+    "wb_draw_line",
+    "wb_draw_code",
+    "wb_edit_code",
+    "wb_clear",
+    "wb_delete"
+   ]
+  },
+  {
+   "id": "default-5",
+   "name": "笔记员",
+   "role": "student",
+   "priority": 5,
+   "persona": "You are the dedicated note-taker of the class. You listen carefully, organize information,",
+   "allowed": [
+    "wb_open",
+    "wb_close",
+    "wb_draw_text",
+    "wb_draw_shape",
+    "wb_draw_chart",
+    "wb_draw_latex",
+    "wb_draw_table",
+    "wb_draw_line",
+    "wb_draw_code",
+    "wb_edit_code",
+    "wb_clear",
+    "wb_delete"
+   ]
+  },
+  {
+   "id": "default-6",
+   "name": "思考者",
+   "role": "student",
+   "priority": 6,
+   "persona": "You are the deep thinker of the class. While others focus on understanding the basics, you",
+   "allowed": [
+    "wb_open",
+    "wb_close",
+    "wb_draw_text",
+    "wb_draw_shape",
+    "wb_draw_chart",
+    "wb_draw_latex",
+    "wb_draw_table",
+    "wb_draw_line",
+    "wb_draw_code",
+    "wb_edit_code",
+    "wb_clear",
+    "wb_delete"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,607 @@
+const NS = "http://www.w3.org/2000/svg";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function el(tag, attrs, parent, text){ const e = document.createElementNS(NS, tag); for (const k in (attrs||{})) e.setAttribute(k, attrs[k]); if (text !== undefined) e.textContent = text; if (parent) parent.appendChild(e); return e; }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const STORE_NS = "repolens:" + (typeof PAGE !== "undefined" && PAGE.id || "page") + ":";
+const store = { get(k,d){ try{ const v = localStorage.getItem(STORE_NS+k); return v===null?d:JSON.parse(v);}catch(e){return d;} }, set(k,v){ try{ localStorage.setItem(STORE_NS+k, JSON.stringify(v)); }catch(e){} } };
+
+const svg = $("#cv");
+let stack = ["meta"], G = null, NODES = {}, EDGES = {}, player = null, playing = false, speed = 1, selected = null, view = {x:0,y:0,w:1000,h:600};
+let layers = store.get("layers", {concept:true}), anchorMode = false, anchors = [];
+let profile = store.get("profile", null), predictOn = store.get("predict", false), predictWait = null, predictLog = store.get("predictLog", []);
+let trail = store.get("trail", []), pins = store.get("pins", {}), rates = store.get("rates", {});
+
+/* ---------------- view ---------------- */
+function applyView(){ svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`); }
+function fitView(){ view = fitTarget(); applyView(); }
+function svgPt(cx, cy){ const p = svg.createSVGPoint(); p.x = cx; p.y = cy; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+function tweenView(to, ms){ const from = {...view}; const t0 = performance.now(); ms = reduced ? 1 : ms; return new Promise(res => { (function f(now){ const k = Math.min(1,(now-t0)/ms), e = k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; for (const key of ["x","y","w","h"]) view[key] = from[key]+(to[key]-from[key])*e; applyView(); k<1?requestAnimationFrame(f):res(); })(t0); }); }
+function zoomAt(f, cx, cy){ const p = (cx===undefined)?{x:view.x+view.w/2,y:view.y+view.h/2}:svgPt(cx,cy); view = {x:p.x-(p.x-view.x)*f, y:p.y-(p.y-view.y)*f, w:view.w*f, h:view.h*f}; applyView(); }
+svg.addEventListener("wheel", e => { e.preventDefault(); zoomAt(Math.exp(e.deltaY*0.0015), e.clientX, e.clientY); }, {passive:false});
+let drag = null;
+svg.addEventListener("pointerdown", e => { if (e.target.closest(".node,.hit")) return; drag = {x:e.clientX, y:e.clientY, v:{...view}}; svg.classList.add("dragging"); svg.setPointerCapture(e.pointerId); });
+svg.addEventListener("pointermove", e => { if (!drag) return; const r = svg.getBoundingClientRect(); const s = Math.max(drag.v.w/r.width, drag.v.h/r.height); view.x = drag.v.x-(e.clientX-drag.x)*s; view.y = drag.v.y-(e.clientY-drag.y)*s; applyView(); });
+svg.addEventListener("pointerup", () => { drag = null; svg.classList.remove("dragging"); });
+$("#zin").onclick = () => zoomAt(0.8); $("#zout").onclick = () => zoomAt(1.25); $("#zfit").onclick = () => tweenView(fitTarget(), 350);
+function fitTarget(){
+  let b; if (!G.custom) try{ const w = svg.querySelector("#world"); b = w && w.getBBox(); }catch(e){}
+  if (!b || !b.width) b = {x:0,y:0,width:G.world.w,height:G.world.h};
+  const pad = 24, r = svg.getBoundingClientRect(), capH = 64 * Math.max(b.width/(r.width||1), b.height/(r.height||1));
+  const legH = 44 * Math.max(b.width/(r.width||1), b.height/(r.height||1));
+  return {x:b.x-pad, y:b.y-pad-legH, w:b.width+2*pad, h:b.height+2*pad+capH+legH};
+}
+
+/* ---------------- geometry ---------------- */
+function borderPt(n, tx, ty){ const dx = tx-n.x, dy = ty-n.y; if (!dx && !dy) return [n.x,n.y]; const s = Math.min((n.w/2)/Math.max(Math.abs(dx),1e-6), (n.h/2)/Math.max(Math.abs(dy),1e-6)); return [n.x+dx*s, n.y+dy*s]; }
+function edgeD(a, b, e){
+  let c = e.via;
+  if (!c && e.bend){ const mx=(a.x+b.x)/2, my=(a.y+b.y)/2, dx=b.x-a.x, dy=b.y-a.y, L=Math.hypot(dx,dy)||1; c = [mx - dy/L*e.bend, my + dx/L*e.bend]; }
+  if (c){ const s = borderPt(a,c[0],c[1]), t = borderPt(b,c[0],c[1]); return `M${s[0]},${s[1]} Q${c[0]},${c[1]} ${t[0]},${t[1]}`; }
+  const s = borderPt(a,b.x,b.y), t = borderPt(b,a.x,a.y); return `M${s[0]},${s[1]} L${t[0]},${t[1]}`;
+}
+
+/* ---------------- auto layout (nodes without x/y) ---------------- */
+const BACK_KINDS = new Set(["loop","concept","prereq","spec","proposed"]);
+function layerize(ids, edges){
+  const out = {}; ids.forEach(i => out[i] = []);
+  edges.forEach(e => { if (out[e.from] && out[e.to] && e.from !== e.to) out[e.from].push(e.to); });
+  const state = {}, order = [], back = new Set();
+  const dfs = u => { state[u] = 1; out[u].forEach(v => { if (state[v] === 1) back.add(u + ">" + v); else if (!state[v]) dfs(v); }); state[u] = 2; order.push(u); };
+  ids.forEach(i => { if (!state[i]) dfs(i); });
+  const layer = {}; order.reverse().forEach(u => { layer[u] = layer[u] || 0; out[u].forEach(v => { if (!back.has(u + ">" + v)) layer[v] = Math.max(layer[v] || 0, layer[u] + 1); }); });
+  return layer;
+}
+function autoLayout(G){
+  if (G._laid) return; G._laid = true;
+  const free = G.nodes.filter(n => n.x === undefined || n.y === undefined);
+  if (!free.length) return;
+  const W = n => n.w || (n.kind === "repo" ? 330 : 210), H = n => n.h || (n.lines ? 150 : (n.sub ? 66 : 50));
+  const main = free.filter(n => n.layer !== "concept"), con = free.filter(n => n.layer === "concept");
+  const flowEdges = G.edges.filter(e => !BACK_KINDS.has(e.kind));
+  const dirLR = (G.layout && G.layout.dir) === "LR" || !(G.groups || []).some(g => g.id);
+  const gids = [...(G.groups || []).filter(g => g.id && g.x === undefined).map(g => g.id)];
+  main.forEach(n => { const k = n.group || "_"; if (!gids.includes(k)) gids.push(k); });
+  let cursor = 40, maxBottom = 0; const top = 70, PADX = 30;
+  gids.forEach(gid => {
+    const ns = main.filter(n => (n.group || "_") === gid); if (!ns.length) return;
+    const ids = ns.map(n => n.id), layer = layerize(ids, flowEdges.filter(e => ids.includes(e.from) && ids.includes(e.to)));
+    const rows = []; ns.forEach(n => { const l = layer[n.id] || 0; (rows[l] = rows[l] || []).push(n); });
+    for (let pass = 0; pass < 2; pass++) rows.forEach((row, li) => { if (!li) return; const prev = rows[li - 1] || [];
+      row.forEach(n => { const ps = flowEdges.filter(e => e.to === n.id).map(e => prev.findIndex(m => m.id === e.from)).filter(i => i >= 0); n._bc = ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : 1e3; });
+      row.sort((a, b) => a._bc - b._bc); });
+    if (dirLR){
+      let x = cursor + PADX; rows.forEach(row => { if (!row) return; const cw = Math.max(...row.map(W)); let y = top + 30;
+        row.forEach(n => { n.x = x + cw / 2; n.y = y + H(n) / 2; y += H(n) + 60; maxBottom = Math.max(maxBottom, y); }); x += cw + 90; });
+      cursor = x + 20;
+    } else {
+      const widths = rows.map(r => r ? r.reduce((s, n) => s + W(n), 0) + (r.length - 1) * 40 : 0), gw = Math.max(...widths, 220);
+      let y = top + 40; rows.forEach((row, li) => { if (!row) return; let x = cursor + PADX + (gw - widths[li]) / 2; const rh = Math.max(...row.map(H));
+        row.forEach(n => { n.x = x + W(n) / 2; n.y = y + rh / 2; x += W(n) + 40; }); y += rh + 80; maxBottom = Math.max(maxBottom, y); });
+      cursor += gw + 2 * PADX + 40;
+    }
+    const g = (G.groups || []).find(x => x.id === gid);
+    if (g && g.x === undefined){ const xs = ns.map(n => n.x - W(n) / 2), xe = ns.map(n => n.x + W(n) / 2), ys = ns.map(n => n.y - H(n) / 2), ye = ns.map(n => n.y + H(n) / 2);
+      g.x = Math.min(...xs) - PADX; g.y = Math.min(...ys) - 45; g.w = Math.max(Math.max(...xe) - g.x + PADX, String(g.label || "").length * 8.6 + 40); g.h = Math.max(...ye) - g.y + 30; }
+  });
+  if (con.length){
+    const ids = con.map(n => n.id), layer = layerize(ids, G.edges.filter(e => e.kind === "prereq" && ids.includes(e.from) && ids.includes(e.to)));
+    const rows = []; con.forEach(n => { const l = layer[n.id] || 0; (rows[l] = rows[l] || []).push(n); });
+    let x = 60; const y0 = maxBottom + 90;
+    rows.forEach(row => { if (!row) return; let y = y0; row.forEach(n => { n.w = n.w || 250; n.x = x + n.w / 2; n.y = y + 33; y += 110; maxBottom = Math.max(maxBottom, y); }); x += 300; });
+    if (!(G.groups || []).some(g => g.layer === "concept")) (G.groups = G.groups || []).push({ x: 30, y: y0 - 45, w: Math.max(x, cursor) - 30, h: maxBottom - y0 + 60, label: "知识层 · 读懂这段代码需要的概念", layer: "concept", kind: "concept" });
+  }
+  const all = G.nodes; G.world = G.world || { w: Math.max(...all.map(n => n.x + W(n) / 2)) + 40, h: Math.max(...all.map(n => n.y + H(n) / 2)) + 40 };
+}
+
+/* ---------------- rendering a generic graph ---------------- */
+let L = {};
+function renderGeneric(){
+  svg.innerHTML = "";
+  const defs = el("defs", {}, svg);
+  const mk = (id, color) => { const m = el("marker",{id, viewBox:"0 0 10 10", refX:"9", refY:"5", markerWidth:"7", markerHeight:"7", orient:"auto-start-reverse"}, defs); el("path",{d:"M0,0 L10,5 L0,10 z", fill:color}, m); };
+  mk("arr","color-mix(in srgb, var(--ink) 45%, transparent)"); mk("arrlit","var(--lit)"); mk("arracc","var(--accent)"); mk("arrcon","var(--concept)");
+  const pat = el("pattern",{id:"dots", width:"24", height:"24", patternUnits:"userSpaceOnUse"}, defs); el("circle",{cx:"1.5",cy:"1.5",r:"1.2",fill:"var(--grid)"}, pat);
+  el("rect",{class:"hit", x:-4000, y:-4000, width:12000, height:12000, fill:"url(#dots)"}, svg).classList.remove("hit");
+  const root = el("g",{id:"world"}, svg);
+  L = { groups: el("g",{},root), edges: el("g",{},root), labels: el("g",{},root), nodes: el("g",{},root), tags: el("g",{},root), pk: el("g",{},root), custom: el("g",{},root) };
+  if (G.custom) return;
+  autoLayout(G);
+  (G.groups||[]).filter(g => !g.layer || layers[g.layer]).forEach(g => { el("rect",{x:g.x,y:g.y,width:g.w,height:g.h,rx:16,class:"grp "+(g.kind||"")}, L.groups); el("text",{x:g.x+16,y:g.y+24,class:"gl"}, L.groups, g.label); });
+  NODES = {}; EDGES = {};
+  const hiddenNode = n => n.layer && !layers[n.layer];
+  G.nodes.forEach(n => { if (hiddenNode(n)) return; NODES[n.id] = Object.assign({w:n.kind==="repo"?330:210, h:n.lines?150:(n.sub?66:50)}, n); });
+  G.edges.forEach((e,i) => {
+    const id = e.id || (e.from+">"+e.to); const a = NODES[e.from], b = NODES[e.to]; if (!a || !b) return;
+    const p = el("path",{d:edgeD(a,b,e), class:"edge k-"+(e.kind||"data"), "marker-end":`url(#${e.kind==="loop"?"arracc":(e.kind==="concept"||e.kind==="prereq")?"arrcon":"arr"})`}, L.edges);
+    EDGES[id] = {e, p};
+    if (e.label){
+      const len = p.getTotalLength(), pt = p.getPointAtLength(len*(e.lt||0.5));
+      const g = el("g",{class:"elab"}, L.labels); const t = el("text",{x:pt.x, y:pt.y+4, "text-anchor":"middle"}, g, e.label);
+      const bb = t.getBBox(); el("rect",{x:bb.x-4,y:bb.y-2,width:bb.width+8,height:bb.height+4,rx:4}, g, undefined); g.insertBefore(g.lastChild, t); EDGES[id].lab = g;
+    }
+  });
+  Object.values(NODES).forEach(n => drawNode(n));
+}
+function drawNode(n){
+  const g = el("g",{class:`node k-${n.kind||"process"}`, "data-id":n.id, tabindex:"0", role:"button", "aria-label":n.label}, L.nodes);
+  el("rect",{class:"box", x:n.x-n.w/2, y:n.y-n.h/2, width:n.w, height:n.h, rx:n.kind==="data"?4:10}, g);
+  if (n.dep) g.classList.add("dep-"+n.dep);
+  if (n.kind==="concept"){ el("text",{x:n.x-n.w/2+4, y:n.y-n.h/2-6, class:"conmark"}, g, "◆ 概念"); }
+  if (n.kind==="paper"){ el("text",{x:n.x-n.w/2+4, y:n.y-n.h/2-6, class:"papmark"}, g, n.tag||"论文"); }
+  if (n.kind==="proposed"){ el("text",{x:n.x-n.w/2+4, y:n.y-n.h/2-6, class:"propmark"}, g, "＋ 提议"); }
+  if (n.kind==="question"){ el("text",{x:n.x-n.w/2+4, y:n.y-n.h/2-6, class:"qmark"}, g, "? 迁移问题"); }
+  if (n.kind==="ai"){ el("text",{x:n.x-n.w/2+10, y:n.y-n.h/2+17, class:"aimark"}, g, "✦ LLM"); }
+  if (n.kind==="agent"){ el("circle",{cx:n.x-n.w/2+18, cy:n.y, r:9, fill:n.color||"var(--accent)"}, g); }
+  if (n.repro && n.repro.limit){ const w = el("g",{class:"warnmark"}, g); el("circle",{cx:n.x-n.w/2+2, cy:n.y+n.h/2-2, r:10}, w); el("text",{x:n.x-n.w/2+2, y:n.y+n.h/2+3, "text-anchor":"middle"}, w, "!"); }
+  if (n.kind==="model") el("rect",{x:n.x-n.w/2, y:n.y-n.h/2, width:6, height:n.h, rx:3, fill:"var(--model-ink)"}, g);
+  if (n.kind==="data") el("path",{d:`M${n.x+n.w/2-14},${n.y-n.h/2} L${n.x+n.w/2},${n.y-n.h/2+14}`, stroke:"var(--data-ink)", "stroke-width":"1.4", fill:"none"}, g);
+  if (n.lines){
+    el("text",{x:n.x-n.w/2+18, y:n.y-n.h/2+36, class:"t"}, g, n.label);
+    n.lines.forEach((ln,i) => el("text",{x:n.x-n.w/2+18, y:n.y-n.h/2+64+i*22, class:i===0?"s":"s", style:i===0?"fill:var(--accent);font-family:var(--body);font-size:13.5px;font-weight:600":"font-size:12.5px"}, g, ln));
+  } else {
+    el("text",{x:n.x, y:n.sub?n.y-4:n.y+5, "text-anchor":"middle", class:"t"}, g, n.label);
+    if (n.sub) el("text",{x:n.x, y:n.y+17, "text-anchor":"middle", class:"s"}, g, n.sub);
+  }
+  g.querySelectorAll("text").forEach(t => { const bw = t.getBBox().width, max = n.w - 18; if (bw > max){ t.setAttribute("textLength", max); t.setAttribute("lengthAdjust", "spacingAndGlyphs"); } });
+  if (n.drill){ const d = el("g",{class:"drill"}, g); el("circle",{cx:n.x+n.w/2-2, cy:n.y-n.h/2+2, r:11}, d); el("path",{d:`M${n.x+n.w/2-7},${n.y-n.h/2+7} l9,-9 m-5,0 h5 v5`}, d); el("title",{}, g, "双击进入内部"); }
+  if (isVisited(G.id, n.id)) el("circle",{class:"visited", cx:n.x-n.w/2+2, cy:n.y-n.h/2+2, r:5}, g);
+  const pc = (pins[G.id+"/"+n.id]||[]).length;
+  if (pc){ const f = el("g",{class:"pinflag"}, g); el("rect",{x:n.x+n.w/2-30, y:n.y+n.h/2-10, width:30, height:18, rx:9}, f); el("text",{x:n.x+n.w/2-15, y:n.y+n.h/2+3, "text-anchor":"middle"}, f, "?"+pc); }
+  if (selected===n.id) g.classList.add("sel");
+  if (anchors.includes(n.id)) g.classList.add("anchor");
+  if (n.kind === "concept" && profile && (profile.known || []).includes(n.id)) g.classList.add("known");
+  g.addEventListener("click", e => { e.stopPropagation(); if (predictWait){ predictWait(n.id); return; } if (anchorMode && G.intervene){ toggleAnchor(n.id); return; } select(n.id); });
+  g.addEventListener("dblclick", e => { e.stopPropagation(); if (n.drill) drill(n); });
+  g.addEventListener("keydown", e => { if (e.key==="Enter") { n.drill ? drill(n) : select(n.id); } });
+  n.g = g; return g;
+}
+function redrawNode(id){ const n = NODES[id]; if (!n || !n.g) return; const old = n.g; drawNode(n); old.replaceWith(n.g); }
+
+/* ---------------- packets & tags ---------------- */
+function pill(parent, x, y, text, cls){ const g = el("g",{class:cls}, parent); const t = el("text",{x, y, "text-anchor":"middle"}, g, text); const bb = t.getBBox(); const r = el("rect",{x:bb.x-7,y:bb.y-3,width:bb.width+14,height:bb.height+6,rx:(bb.height+6)/2}); g.insertBefore(r,t); return g; }
+function setTag(nodeId, text){
+  const n = NODES[nodeId]; if (!n) return; if (n.tagEl) n.tagEl.remove();
+  if (!text) return; n.tagEl = pill(L.tags, n.x, n.y+n.h/2+20, text, "tag");
+}
+function animPacket(edgeId, text){
+  const E = EDGES[edgeId]; if (!E){ console.warn("no edge", edgeId); return Promise.resolve(); }
+  const p = E.p, len = p.getTotalLength(), dur = reduced ? 1 : Math.max(500, Math.min(1500, len*2.2))/speed;
+  E.p.classList.add("lit"); E.p.setAttribute("marker-end","url(#arrlit)");
+  const g = el("g",{class:"pkt"}, L.pk); el("circle",{r:7}, g); const lab = text ? pill(g, 0, -16, text, "pkt") : null;
+  const t0 = performance.now();
+  return new Promise(res => { (function f(now){ const k = Math.min(1,(now-t0)/dur), e = k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2; const pt = p.getPointAtLength(len*e); g.setAttribute("transform",`translate(${pt.x},${pt.y})`); if (k<1) requestAnimationFrame(f); else { g.remove(); const tgt = NODES[E.e.to]; if (tgt){ tgt.g.classList.add("lit","pulse"); setTimeout(()=>tgt.g&&tgt.g.classList.remove("pulse"),600); } if (text) setTag(E.e.to, text); res(); } })(t0); });
+}
+async function runOne(st){
+  if (st.e) return animPacket(st.e, st.p);
+  if (st.n){ const n = NODES[st.n]; if (n){ n.g.classList.add("lit","pulse"); setTimeout(()=>n.g&&n.g.classList.remove("pulse"),600); if (st.p) setTag(st.n, st.p); } return sleep(600/speed); }
+}
+function caption(text, counter){ $("#ctx").innerHTML = text||""; $("#ctr").textContent = counter||""; }
+
+function stepVisible(st){
+  if (!profile || !(profile.known || []).length || !st.e || !EDGES[st.e]) return true;
+  const E = EDGES[st.e].e, isC = id => NODES[id] && NODES[id].kind === "concept";
+  return !(isC(E.from) && isC(E.to) && profile.known.includes(E.to));
+}
+async function askPredict(st, k, n){
+  const E = EDGES[st.e].e, src = NODES[E.from], dst = NODES[E.to];
+  src.g.classList.add("lit","pulse"); setTimeout(() => src.g && src.g.classList.remove("pulse"), 600);
+  const was = playing; caption(`<b>先猜一下：</b>数据从「${esc(src.label)}」出来，下一站是哪里？点图上的节点。<button class="linkish" id="pskip">跳过</button>`, `${k} / ${n}`);
+  const pick = await new Promise(res => { predictWait = res; const s = document.getElementById("pskip"); if (s) s.onclick = () => res(null); });
+  predictWait = null;
+  if (pick === null) return;
+  const ok = pick === E.to; predictLog.push({ g: G.id, e: st.e, ok }); store.set("predictLog", predictLog);
+  if (NODES[pick] && !ok){ NODES[pick].g.classList.add("wrong"); setTimeout(() => NODES[pick] && NODES[pick].g.classList.remove("wrong"), 1400); }
+  caption(ok ? `<span class="okmark">✓ 对了</span> 下一站是「${esc(dst.label)}」` : `<span class="badmark">✗</span> 你选了「${esc((NODES[pick]||{}).label||pick)}」，实际是「${esc(dst.label)}」`, `${k} / ${n}`);
+  renderProfileChip(); await sleep(ok ? 700 : 1500);
+}
+function genericPlayer(){
+  let si = 0, k = 0; const S = () => G.scenarios[si];
+  const api = {
+    names: G.scenarios.map(s => s.name),
+    select(i){ si = i; k = 0; this.reset(); },
+    reset(){ k = 0; Object.values(EDGES).forEach(E => { E.p.classList.remove("lit","dim"); E.p.setAttribute("marker-end",`url(#${E.e.kind==="loop"?"arracc":"arr"})`); E.lab&&E.lab.classList.remove("dim"); }); Object.values(NODES).forEach(n => { n.g.classList.remove("lit","dim"); if (n.tagEl){ n.tagEl.remove(); n.tagEl = null; } });
+      (S().skip||[]).forEach(id => { NODES[id]&&NODES[id].g.classList.add("dim"); });
+      (S().skipEdges||[]).forEach(id => { EDGES[id]&&(EDGES[id].p.classList.add("dim"), EDGES[id].lab&&EDGES[id].lab.classList.add("dim")); });
+      caption(S().intro||"", `0 / ${S().steps.filter(stepVisible).length}`); },
+    async step(){ const steps = S().steps.filter(stepVisible); if (k >= steps.length) return false; const st = steps[k++];
+      if (predictOn && st.e && EDGES[st.e] && NODES[EDGES[st.e].e.from] && NODES[EDGES[st.e].e.to]) await askPredict(st, k, steps.length);
+      caption(st.c||"", `${k} / ${steps.length}`); if (st.par) await Promise.all(st.par.map(runOne)); else await runOne(st); return k < steps.length; },
+    done(){ return k >= S().steps.filter(stepVisible).length; }
+  };
+  return api;
+}
+
+/* ---------------- graph switching ---------------- */
+function load(id, opts={}){
+  playing = false; updatePlay();
+  G = GRAPHS[id]; selected = null; renderGeneric();
+  if (G.custom){ player = G.custom(customCtx()); } else { player = G.scenarios && G.scenarios.length ? genericPlayer() : null; }
+  fitView(); renderCrumbs(); renderScens(0); if (anchorMode && G.intervene) renderIntervene(); else { anchorMode = false; inspectGraph(); } renderLayerBar(); renderFrames();
+  if (player) player.select(0); else caption(G.intro||"", "");
+  svg.style.opacity = 1;
+}
+async function drill(n){
+  const target = {x:n.x-n.w, y:n.y-n.h*1.5, w:n.w*2, h:n.h*3};
+  await tweenView(target, 380);
+  svg.style.transition = reduced?"":"opacity .18s"; svg.style.opacity = 0; await sleep(reduced?0:180);
+  stack.push(n.drill); load(n.drill);
+  svg.style.opacity = 1;
+}
+function renderLayerBar(){
+  const has = (G.nodes||[]).some(n => n.layer==="concept");
+  const b = $("#conceptb"); b.hidden = !has; b.setAttribute("aria-pressed", String(!!layers.concept));
+  const iv = $("#intervb"); iv.hidden = !G.intervene;
+}
+$("#conceptb").onclick = () => { layers.concept = !layers.concept; store.set("layers", layers); const keep = selected; load(G.id); if (keep && NODES[keep]) select(keep); };
+function routeFrames(){
+  if (!profile || typeof ROUTES === "undefined" || !ROUTES[profile.goal]) return { route: FRAMES.map((f, i) => i), rest: [] };
+  let ids = ROUTES[profile.goal].slice(); const cap = { "15": 3, "60": 5 }[profile.time]; if (cap) ids = ids.slice(0, cap);
+  const route = ids.map(id => FRAMES.findIndex(f => f.id === id)).filter(i => i >= 0);
+  return { route, rest: FRAMES.map((f, i) => i).filter(i => !route.includes(i)) };
+}
+function openFrame(i){ const f = FRAMES[i]; if (f.layers) { Object.assign(layers, f.layers); store.set("layers", layers); } if (f.repro !== undefined) { reproOn = f.repro; applyRepro(); } stack = pathTo(f.g); load(f.g); if (f.select && NODES[f.select]) select(f.select); if (f.intervene) openIntervene(); if (f.scenario !== undefined && player) { player.select(f.scenario); renderScens(f.scenario); } }
+function renderFrames(){
+  const box = $("#frames"); if (!box) return;
+  const { route, rest } = routeFrames();
+  const btn = (i, n) => `<button class="frame" aria-current="${G.id===FRAMES[i].g}" data-f="${i}"><span class="fn">${n}</span>${esc(FRAMES[i].name)}</button>`;
+  box.innerHTML = (profile ? `<span class="label">你的路线</span>` : "") + route.map((i, k) => btn(i, k + 1)).join("") +
+    (rest.length ? `<details class="more"><summary>其他 ${rest.length} 帧</summary><div>${rest.map(i => btn(i, "·")).join("")}</div></details>` : "");
+  box.querySelectorAll("button.frame").forEach(b => b.onclick = () => openFrame(+b.dataset.f));
+}
+function goTo(depth){ if (depth === stack.length-1) return; stack = stack.slice(0, depth+1); load(stack[depth]); }
+function renderCrumbs(){
+  $("#crumbs").innerHTML = stack.map((id,i) => `<button data-d="${i}">${esc(GRAPHS[id].title)}</button>`).join(`<span class="sep">›</span>`);
+  document.querySelectorAll("#crumbs button").forEach(b => b.onclick = () => goTo(+b.dataset.d));
+  try{ history.replaceState(null, "", "#"+stack[stack.length-1].replace(/\./g,"-")); }catch(e){}
+}
+function renderScens(active){
+  const box = $("#scens");
+  if (!player){ box.innerHTML = `<span class="hint">这一层没有动画场景，点节点看细节</span>`; ["#reset","#stepb","#playb"].forEach(s => $(s).disabled = true); return; }
+  ["#reset","#stepb","#playb"].forEach(s => $(s).disabled = false);
+  box.innerHTML = player.names.map((nm,i) => `<button class="chipbtn" aria-pressed="${i===active}" data-s="${i}">${esc(nm)}</button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => { playing = false; updatePlay(); player.select(+b.dataset.s); renderScens(+b.dataset.s); });
+}
+function updatePlay(){ $("#playb").textContent = playing ? "❚❚ 暂停" : "▶ 播放"; }
+let busy = false;
+$("#playb").onclick = async () => {
+  if (!player) return; if (playing){ playing = false; updatePlay(); return; }
+  if (player.done()) player.reset();
+  playing = true; updatePlay();
+  while (playing){ if (busy){ await sleep(50); continue; } busy = true; const more = await player.step(); busy = false; if (!more){ playing = false; break; } await sleep(350/speed); }
+  updatePlay();
+};
+$("#stepb").onclick = async () => { if (!player || busy) return; playing = false; updatePlay(); if (player.done()) player.reset(); busy = true; await player.step(); busy = false; };
+$("#reset").onclick = () => { playing = false; updatePlay(); player && player.reset(); };
+let reproOn = store.get("repro", false);
+function applyRepro(){ svg.classList.toggle("repro", reproOn); $("#reprob").setAttribute("aria-pressed", String(reproOn)); $("#legend").hidden = reproOn; $("#legend2").hidden = !reproOn; }
+$("#reprob").onclick = () => { reproOn = !reproOn; store.set("repro", reproOn); applyRepro(); };
+function applyPredict(){ $("#predb").setAttribute("aria-pressed", String(predictOn)); }
+$("#predb").onclick = () => { predictOn = !predictOn; store.set("predict", predictOn); applyPredict(); };
+$("#speed").onclick = () => { speed = speed===1?2:speed===2?0.5:1; $("#speed").textContent = speed+"×"; };
+
+/* ---------------- inspector ---------------- */
+const KIND = {process:"处理步骤", data:"数据", model:"模型 / 训练", external:"外部服务", stage:"环节", repo:"仓库", portal:"另一个场景", ai:"AI 生成 · 一次 LLM 调用", gate:"人工确认", store:"存储", agent:"课堂智能体", concept:"概念 · 知识层", paper:"论文", proposed:"提议的新组件", question:"迁移问题", pattern:"跨仓库模式"};
+const PROV = {run:"本地实跑仓库代码", template:"提示词模板原文", test:"仓库测试里的 mock 输出", eval:"评测场景数据（人工构造）", example:"模板里自带的示例", code:"代码", data:"仓库提交的真实运行结果"};
+const DEP = {ran:"我在 CPU 上实跑过", ai:"需要 LLM / 外部 AI 服务", infra:"需要 Postgres / GPU / 浏览器等基础设施", local:"纯逻辑，无外部依赖"};
+const RUNTXT = {ran:"已在 CPU 上运行仓库原代码", synth:"原代码 + 合成数据", gpu:"需要 GPU，本次只读代码"};
+function codeHtml(c, repo){
+  const key = c.nb ? `${repo}|nb|${c.nb}|${c.cell}` : `${repo}|${c.f}|${c.a}|${c.b}`;
+  const src = SRC[key]; const path = c.nb || c.f;
+  const href = GH[repo] + path + (c.nb ? "" : `#L${c.a}-L${c.b}`);
+  const label = c.nb ? `${path} · cell ${c.cell}` : `${path}:${c.a}–${c.b}`;
+  const body = src ? src.split("\n").map((ln,j) => `<span class="ln">${c.nb?"":c.a+j}</span>${esc(ln)}`).join("\n") : "";
+  return `<div class="code"><div class="cf"><span>${esc(label)}</span><a href="${href}" target="_blank" rel="noopener">GitHub</a></div>${body?`<pre>${body}</pre>`:""}</div>`;
+}
+function refText(r, repo){ if (!r) return ""; if (r.text!==undefined) return r.text; const key = `${repo}|${r.f}|${r.a}|${r.b}`; return SRC[key]||""; }
+function aiioHtml(io, repo){
+  const part = (label, r) => { if (!r) return ""; const txt = refText(r, repo); const where = r.f?`<a href="${GH[repo]}${r.f}#L${r.a}-L${r.b}" target="_blank" rel="noopener">${esc(r.f.split("/").pop())}:${r.a}–${r.b}</a>`:""; return `<div class="iobox"><div class="iohead"><b>${label}</b><span class="prov p-${r.prov}">${esc(PROV[r.prov]||"")}</span>${where}</div><pre>${esc(txt)}</pre>${r.note?`<p class="hint">${r.note}</p>`:""}</div>`; };
+  return `<div class="aiio"><span class="label">这次 LLM 调用的输入和输出</span>${part("输入", io.input)}${part("模型原始输出", io.output)}${part("代码处理后", io.parsed)}</div>`;
+}
+function reproHtml(r, dep){
+  const row = (k, v) => v ? `<b>${k}</b><span>${v}</span>` : "";
+  return `<div class="repro"><span class="label">复现视角</span>${dep?`<span class="dep d-${dep}">${esc(DEP[dep])}</span>`:""}<div class="rgrid">${row("前因", r.why)}${row("依赖", r.need)}${row("局限", r.limit)}${row("下一步", r.next)}</div></div>`;
+}
+const STATUS = {match:["一致","ok"], approx:["近似","warn"], diverge:["偏离","bad"], nocompare:["不可直接比较","muted"]};
+function wireGoto(){ document.querySelectorAll("#insp [data-goto]").forEach(b => b.onclick = () => { const t = b.dataset.goto; if (NODES[t]) { select(t); const m = NODES[t]; tweenView({x:m.x-m.w*2.2, y:m.y-m.h*4.5, w:m.w*4.4, h:m.h*9}, 350); } }); }
+function conceptHtml(n){
+  if (profile && (profile.known || []).includes(n.id) && !n._open) return `<div class="concept"><p class="hint">你说你熟悉这个概念，所以先收起。</p><button class="btn" id="cexp">展开</button></div>`;
+  const pre = (n.prereq||[]).map(id => NODES[id] ? `<button class="cchip" data-goto="${id}">${esc(NODES[id].label)}</button>` : "").join("");
+  const used = G.edges.filter(e => e.kind==="concept" && e.from===n.id).map(e => NODES[e.to]).filter(Boolean).map(m => `<button class="cchip code" data-goto="${m.id}">${esc(m.label)}</button>`).join("");
+  return `<div class="concept">
+    ${n.def?`<p class="def">${n.def}</p>`:""}
+    ${n.formula?`<div class="formula">${n.formula}</div>`:""}
+    ${n.mini&&MINIS[n.mini]?`<div class="preview">${MINIS[n.mini]()}</div>`:""}
+    <div class="rgrid">${n.here?`<b>在这里</b><span>${n.here}</span>`:""}${n.trap?`<b>容易误解</b><span>${n.trap}</span>`:""}</div>
+    ${pre?`<div class="crow"><span class="label">先要懂</span>${pre}</div>`:""}
+    ${used?`<div class="crow"><span class="label">代码里用在</span>${used}</div>`:""}
+  </div>`;
+}
+function mapsHtml(maps){
+  return `<div class="maps"><span class="label">论文 ↔ 代码</span>${maps.map(m => `<div class="map s-${STATUS[m.s][1]}"><div class="mh"><span class="st">${STATUS[m.s][0]}</span>${NODES[m.to]?`<button class="linkish" data-goto="${m.to}">${esc(NODES[m.to].label)}</button>`:""}</div><p>${m.why}</p>${m.evidence?`<p class="hint">${m.evidence}</p>`:""}</div>`).join("")}</div>`;
+}
+function expHtml(x){ return `<div class="repro"><span class="label">最小实验</span><div class="rgrid">${x.hyp?`<b>假设</b><span>${x.hyp}</span>`:""}${x.minimal?`<b>怎么做</b><span>${x.minimal}</span>`:""}${x.metric?`<b>看什么</b><span>${x.metric}</span>`:""}${x.cost?`<b>成本</b><span>${x.cost}</span>`:""}${x.risk?`<b>风险</b><span>${x.risk}</span>`:""}</div></div>`; }
+function filesHtml(files, repo){
+  return `<div class="files"><span class="label">涉及的文件</span>${files.map(f => `<a class="fileln" href="${GH[repo]}${f.p}${f.a?`#L${f.a}`:""}" target="_blank" rel="noopener"><span class="mono">${esc(f.p)}${f.a?":"+f.a:""}</span>${f.what?`<span>${esc(f.what)}</span>`:""}</a>`).join("")}</div>`;
+}
+async function transferPanel(){
+  const sample = await samplePromise, box = document.getElementById("xfer"); if (!box) return;
+  const ex = G.transfer.example;
+  const render = (cards, src) => { box.innerHTML = `<span class="prov ${src === "live" ? "p-run" : "p-example"}">${src === "live" ? "Claude 刚刚基于这些模式生成" : "示例：非实时生成"}</span>` + cards.map(c => `<div class="xcard"><b>${esc(c.title || "")}</b><span class="hint">来自模式：${esc(c.pattern || "")} · ${esc(c.from || "")}</span>${expHtml({ hyp: esc(c.hypothesis || ""), minimal: esc(c.minimal_experiment || ""), metric: esc(c.metric || ""), cost: esc(c.cost || ""), risk: esc(c.risk || "") })}</div>`).join(""); };
+  const tgt = $("#xtarget"); if (tgt && profile && profile.target && !tgt.value) tgt.value = profile.target;
+  $("#xex").onclick = () => { tgt.value = ex.target; render(ex.cards, "example"); };
+  const go = $("#xgo"); if (!sample){ go.hidden = true; return; }
+  go.onclick = async () => { const t = tgt.value.trim(); if (!t) return; go.disabled = true; box.innerHTML = '<p class="hint">Claude 在读这些模式，通常需要 20–60 秒。</p>';
+    try { const pats = G.nodes.filter(n => n.kind === "pattern" || n.kind === "question" || n.jump).map(n => ({ id: n.id, label: n.label, sub: n.sub || "", role: (n.role || "").replace(/<[^>]+>/g, "") }));
+      const cards = await sample.json(`You design small, falsifiable experiments that transfer patterns found in research code to a new setting. Write prose fields in Simplified Chinese.\n\nTarget setting from the learner:\n"""${t}"""\n\nPatterns observed across three repositories (JSON):\n${JSON.stringify(pats)}\n\nReply with ONLY a JSON array of exactly 3 objects: {"title": short, "pattern": which pattern, "from": which repo it comes from, "hypothesis": one sentence, "minimal_experiment": what to build or run in the smallest version (concrete steps), "metric": what to measure, "cost": rough time/compute, "risk": the most likely way this transfer fails}. Each must be testable within two weeks.`, { modelTier: "default" });
+      if (!Array.isArray(cards)) throw { code: "invalid_json" }; render(cards, "live");
+    } catch (err) { box.innerHTML = `<p class="hint">${({ not_granted: "没有授权这个页面使用 Claude，可以先看示例。", rate_limited: "调用太频繁，稍后再试。" })[err && err.code] || "生成失败，可以再试一次。"}</p>`; }
+    go.disabled = false; };
+}
+function inspectGraph(){
+  const info = G.info || {};
+  setTimeout(() => { if (G.transfer) transferPanel(); }, 0);
+  $("#insp").innerHTML = `<span class="kchip">${esc(G.kindLabel||"这一层")}</span><h2>${esc(G.title)}</h2>${info.role?`<p>${info.role}</p>`:""}${info.extra||""}${info.repro?reproHtml(info.repro):""}${G.transfer?`<div class="repro"><span class="label">把这些模式用到你的地方</span><textarea id="xtarget" class="ivtext" placeholder="${esc(G.transfer.placeholder)}"></textarea><div class="dnav"><button class="btn primary" id="xgo">生成 3 个迁移实验</button><button class="btn" id="xex">看示例</button></div><div id="xfer"></div></div>`:""}<p class="hint">点节点看细节 · 拖动平移 · 滚轮缩放${G.custom?"":" · 双击 ⤢ 节点放大进入"}</p>`;
+}
+function select(id){
+  selected = id; const n = NODES[id]; if (!n) return;
+  Object.values(NODES).forEach(m => m.g && m.g.classList.toggle("sel", m.id===id));
+  Object.values(EDGES).forEach(E => { if (E.e.kind === "concept" || E.e.kind === "prereq") E.p.classList.toggle("focus", E.e.from === id || E.e.to === id); });
+  visit(G.id, id, n.label);
+  const key = G.id+"/"+id, qs = pins[key]||[], rate = rates[key];
+  const repo = G.repo;
+  $("#insp").innerHTML = `
+    <span class="kchip">${esc(KIND[n.kind||"process"])}</span>
+    <h2>${esc(n.label)}</h2>
+    ${n.role?`<p>${n.role}</p>`:""}
+    ${n.io?`<div class="io"><b>输入</b><span>${esc(n.io[0])}</span><b>输出</b><span>${esc(n.io[1])}</span></div>`:""}
+    ${n.run?`<span class="run ${n.run}">${RUNTXT[n.run]}</span>`:""}
+    ${n.kind==="concept"?conceptHtml(n):""}
+    ${n.maps?mapsHtml(n.maps):""}
+    ${n.experiment?expHtml(n.experiment):""}
+    ${n.jump?`<button class="btn" id="jumpb">→ 去看：${esc(GRAPHS[n.jump.g].title)}${n.jump.label?" · "+esc(n.jump.label):""}</button>`:""}
+    ${n.files?filesHtml(n.files, repo):""}
+    ${n.preview&&PREVIEWS[n.preview]?`<div class="preview">${PREVIEWS[n.preview]()}</div>`:""}
+    ${n.aiio?aiioHtml(n.aiio, repo):""}
+    ${n.repro?reproHtml(n.repro, n.dep):""}
+    ${n.drill?`<button class="btn primary" id="drillb">⤢ 进入内部：${esc(GRAPHS[n.drill].title)}</button>`:""}
+    ${n.note?`<p class="hint">${n.note}</p>`:""}
+    ${n.code&&repo?codeHtml(n.code, repo):""}
+    <div class="pin"><input id="qin" placeholder="在这里记一个问题…" aria-label="记一个问题"><button class="btn" id="qadd">记下</button></div>
+    ${qs.length?`<ul class="qs">${qs.map(q=>`<li>${esc(q)}</li>`).join("")}</ul>`:""}
+    <div class="rate"><span class="label">这个节点看懂了吗</span>${[["clear","懂了"],["meh","有点乱"],["lost","没懂"]].map(([k,t])=>`<button class="btn" data-r="${k}" aria-pressed="${rate===k}">${t}</button>`).join("")}</div>`;
+  const db = $("#drillb"); if (db) db.onclick = () => drill(n);
+  const jb = $("#jumpb"); if (jb) jb.onclick = () => jumpTo(n.jump.g, n.jump.n);
+  const cx = $("#cexp"); if (cx) cx.onclick = () => { n._open = true; select(id); };
+  wireGoto();
+  const add = () => { const v = $("#qin").value.trim(); if (!v) return; (pins[key] = pins[key]||[]).push(v); store.set("pins", pins); trail.push({g:G.id, n:id, label:n.label, q:v}); store.set("trail", trail); redrawNode(id); select(id); renderTrail(); };
+  $("#qadd").onclick = add; $("#qin").onkeydown = e => { if (e.key==="Enter") add(); };
+  document.querySelectorAll("#insp [data-r]").forEach(b => b.onclick = () => { rates[key] = b.dataset.r; store.set("rates", rates); select(id); });
+}
+function isVisited(g, n){ return trail.some(t => t.g===g && t.n===n); }
+function visit(g, n, label){
+  const last = trail[trail.length-1]; const first = !isVisited(g,n);
+  if (!last || last.g!==g || last.n!==n || last.q){ trail.push({g, n, label}); if (trail.length>200) trail = trail.slice(-200); store.set("trail", trail); renderTrail(); }
+  if (first && NODES[n]) redrawNode(n), NODES[n].g.classList.toggle("sel", selected===n);
+}
+function renderTrail(){
+  const box = $("#trail"); if (!trail.length){ box.innerHTML = `<span class="hint">还没有痕迹。点任何节点开始。</span>`; return; }
+  const recent = trail.slice(-40);
+  box.innerHTML = recent.map((t,i) => `<button class="tstep ${t.q?"q":""}" data-i="${trail.length-recent.length+i}" title="${esc(GRAPHS[t.g]?.title||"")}">${t.q?"? "+esc(t.q):esc(t.label)}</button>`).join(`<span class="arrow">→</span>`);
+  box.querySelectorAll("button").forEach(b => b.onclick = () => { const t = trail[+b.dataset.i]; jumpTo(t.g, t.n); });
+}
+function jumpTo(gid, nid){
+  if (G.id !== gid){ const path = pathTo(gid); if (!path) return; stack = path; load(gid); }
+  if (nid && NODES[nid]){ select(nid); const n = NODES[nid]; tweenView({x:n.x-n.w*2, y:n.y-n.h*4, w:n.w*4, h:n.h*8}, 350); }
+}
+function pathTo(gid){ const seen = {}; const q = [["meta"]]; while (q.length){ const p = q.shift(), g = GRAPHS[p[p.length-1]]; if (g.id===gid) return p; (g.nodes||[]).filter(n=>n.drill).forEach(n => { if (!seen[n.drill]){ seen[n.drill]=1; q.push([...p, n.drill]); } }); } return GRAPHS[gid] ? (gid==="meta"?["meta"]:["meta", gid]) : null; }
+$("#cleartrail").onclick = () => { trail = []; store.set("trail", trail); renderTrail(); load(G.id); };
+$("#exportb").onclick = () => {
+  const out = JSON.stringify({tool:"Code Anatomy", page:(typeof PAGE!=="undefined"&&PAGE.id)||"", profile, predictions:{total:predictLog.length, correct:predictLog.filter(x=>x.ok).length, log:predictLog}, trail, questions:pins, understood:rates}, null, 1);
+  const ta = $("#out"); ta.value = out; ta.hidden = false; ta.select();
+  try{ navigator.clipboard.writeText(out).then(()=>$("#exportb").textContent="已复制", ()=>$("#exportb").textContent="请手动复制"); }catch(e){ $("#exportb").textContent = "请手动复制"; }
+};
+
+/* ---------------- custom graph context ---------------- */
+function customCtx(){
+  return { g: L.custom, el, pill, sleep, caption, speed: () => speed, reduced,
+    inspect(html){ $("#insp").innerHTML = html; wireGoto(); },
+    jump(g, n){ jumpTo(g, n); },
+    visit(n,label){ visit(G.id, n, label); } };
+}
+
+
+/* ---------------- intervention: describe a change → grounded feature request ---------------- */
+let samplePromise = (window.claude && typeof window.claude.use === "function") ? window.claude.use("sample").catch(() => null) : Promise.resolve(null);
+let ivState = { text: "", result: null, busy: false, ctl: null, note: "" };
+function toggleAnchor(id){ const i = anchors.indexOf(id); if (i >= 0) anchors.splice(i, 1); else anchors.push(id); redrawNode(id); renderIntervene(); }
+$("#intervb").onclick = () => openIntervene();
+function openIntervene(){ if (!G.intervene) return; anchorMode = true; renderIntervene(); }
+function closeIntervene(){ anchorMode = false; const a = anchors.slice(); anchors = []; a.forEach(redrawNode); inspectGraph(); }
+function contextPack(){
+  const nodes = G.nodes.filter(n => n.kind !== "proposed").map(n => {
+    const files = []; if (n.code) files.push(`${n.code.f}:${n.code.a}-${n.code.b}`);
+    if (n.aiio) ["input","output"].forEach(k => { const r = n.aiio[k]; if (r && r.f) files.push(`${r.f}:${r.a}-${r.b}`); });
+    return { id: n.id, label: n.label, sub: n.sub || "", kind: n.kind || "process", role: (n.role || "").replace(/<[^>]+>/g, "").slice(0, 200), files, limit: n.repro && n.repro.limit ? n.repro.limit.replace(/<[^>]+>/g, "").slice(0, 200) : undefined };
+  });
+  const edges = G.edges.map(e => ({ from: e.from, to: e.to, label: e.label || "" }));
+  const dirs = [...new Set((G.intervene.files || []).map(f => f.replace(/[^/]+$/, "")))].slice(0, 400);
+  return JSON.stringify({ repo: G.intervene.repo, nodes, edges, conventions: G.intervene.conventions, facts: G.intervene.facts, directories: dirs });
+}
+function buildPrompt(text){
+  return `You are a staff engineer who has read this repository and its component graph. A learner proposes a change. Write a feature request grounded ONLY in the components, files and conventions given below. Do not invent files that are not plausible extensions of the listed paths; when you propose a new file, put it next to the related existing files and say it is new.
+
+Write all prose fields in Simplified Chinese; keep identifiers, paths and code in English.
+
+Learner's proposal:
+"""${text}"""
+${anchors.length ? `Components the learner marked on the graph as related: ${anchors.join(", ")}` : "The learner did not mark components."}
+
+Repository graph and conventions (JSON):
+${contextPack()}
+
+Reply with ONLY one JSON object of this shape:
+{"title": string,
+ "summary": string (2-3 sentences: what changes and why),
+ "grounding": [string] (2-4 facts from the given graph/conventions that motivate or constrain this change, each naming the node id or file),
+ "new_components": [{"id": "new_<snake>", "label": short, "sub": short, "kind": "process"|"ai"|"store"|"data", "role": string, "near": existing node id}],
+ "edges": [{"from": id, "to": id, "label": short}] (connect new components to existing node ids; only use ids that exist or that you created),
+ "flow": [{"from": id, "to": id, "payload": short, "caption": one sentence}] (4-9 steps of one request going through the changed system; every step must follow an edge that exists in the graph or in your "edges"),
+ "changes": [{"node": existing id, "file": path, "change": string}],
+ "contracts": [{"name": string, "shape": string}],
+ "risks": [string], "tests": [string], "eval": string, "open_questions": [string]}`;
+}
+function validateProposal(p){
+  const ids = new Set(G.nodes.map(n => n.id));
+  const news = (p.new_components || []).filter(c => c && c.id && !ids.has(c.id)).slice(0, 4);
+  news.forEach(c => ids.add(c.id));
+  const edges = (p.edges || []).filter(e => e && ids.has(e.from) && ids.has(e.to));
+  const edgeSet = new Set([...G.edges.map(e => e.from + ">" + e.to), ...edges.map(e => e.from + ">" + e.to)]);
+  const flow = (p.flow || []).filter(s => s && edgeSet.has(s.from + ">" + s.to));
+  const inv = new Set((G.intervene && G.intervene.files) || []);
+  const changes = (p.changes || []).map(c => ({ ...c, fileStatus: !c.file ? "none" : inv.has(c.file) ? "exists" : inv.size && [...inv].some(f => f.startsWith(c.file.replace(/[^/]+$/, ""))) ? "new" : inv.size ? "unknown" : "unchecked" }));
+  return { ...p, changes, new_components: news, edges, flow, dropped: (p.flow || []).length - flow.length };
+}
+function placeProposal(p){
+  const W = G.world; let x0 = 0;
+  G.nodes = G.nodes.filter(n => n.kind !== "proposed"); G.edges = G.edges.filter(e => !e.proposed);
+  G.scenarios = (G.scenarios || []).filter(s => !s.proposed);
+  const band = W.h + 60;
+  p.new_components.forEach((c, i) => {
+    const near = G.nodes.find(n => n.id === c.near);
+    const x = near ? Math.min(W.w - 140, Math.max(140, near.x + (i % 2 ? 60 : -60))) : 200 + i * 300;
+    G.nodes.push({ id: c.id, x: x + x0, y: band + (i % 2) * 110, label: c.label || c.id, sub: c.sub || "", kind: "proposed", w: 240, role: c.role || "", proposedKind: c.kind });
+    x0 += 0;
+  });
+  p.edges.forEach(e => G.edges.push({ from: e.from, to: e.to, label: e.label || "", kind: "proposed", proposed: true }));
+  if (p.flow.length) G.scenarios.push({ name: "提议：" + (p.title || "改动").slice(0, 8) + ((p.title || "").length > 8 ? "…" : ""), proposed: true, intro: p.summary || "", steps: p.flow.map(s => ({ e: s.from + ">" + s.to, p: s.payload || "", c: s.caption || "" })) });
+}
+function fmtList(a){ return (a || []).map(x => `<li>${esc(x)}</li>`).join(""); }
+function proposalHtml(p, source){
+  return `<div class="fr">
+    <div class="frh"><span class="prov ${source === "live" ? "p-run" : "p-example"}">${source === "live" ? "Claude 刚刚基于这张图生成" : "示例：我基于代码写的，非实时生成"}</span></div>
+    <h3>${esc(p.title || "")}</h3><p>${esc(p.summary || "")}</p>
+    ${p.grounding && p.grounding.length ? `<span class="label">依据（来自仓库）</span><ul>${fmtList(p.grounding)}</ul>` : ""}
+    ${p.changes && p.changes.length ? `<span class="label">要改的地方</span><div class="chg">${p.changes.map(c => `<div><button class="linkish" data-goto="${esc(c.node)}">${esc((G.nodes.find(n => n.id === c.node) || {}).label || c.node)}</button><span class="mono">${esc(c.file || "")} ${c.fileStatus ? `<span class="fst f-${c.fileStatus}">${({exists:"仓库里有这个文件",new:"新文件（目录存在）",unknown:"⚠ 仓库里找不到",unchecked:"",none:""})[c.fileStatus]}</span>` : ""}</span><p>${esc(c.change || "")}</p></div>`).join("")}</div>` : ""}
+    ${p.contracts && p.contracts.length ? `<span class="label">数据契约</span>${p.contracts.map(c => `<div class="iobox"><div class="iohead"><b>${esc(c.name)}</b></div><pre>${esc(c.shape)}</pre></div>`).join("")}` : ""}
+    ${p.risks && p.risks.length ? `<span class="label">风险</span><ul>${fmtList(p.risks)}</ul>` : ""}
+    ${p.tests && p.tests.length ? `<span class="label">测试</span><ul>${fmtList(p.tests)}</ul>` : ""}
+    ${p.eval ? `<span class="label">怎么判断有没有用</span><p>${esc(p.eval)}</p>` : ""}
+    ${p.open_questions && p.open_questions.length ? `<span class="label">还没想清楚的</span><ul>${fmtList(p.open_questions)}</ul>` : ""}
+    ${p.dropped ? `<p class="hint">有 ${p.dropped} 步数据流引用了图上不存在的连线，已略去。</p>` : ""}
+    <div class="dnav"><button class="btn" id="frcopy">复制为 Markdown</button></div>
+  </div>`;
+}
+function proposalMd(p){
+  const L = [`# ${p.title}`, "", p.summary || "", ""];
+  if (p.grounding?.length) L.push("## 依据", ...p.grounding.map(x => "- " + x), "");
+  if (p.changes?.length) L.push("## 改动", ...p.changes.map(c => `- **${c.node}** \`${c.file}\`：${c.change}`), "");
+  if (p.new_components?.length) L.push("## 新组件", ...p.new_components.map(c => `- **${c.label}**（${c.kind}，靠近 ${c.near}）：${c.role}`), "");
+  if (p.contracts?.length) L.push("## 数据契约", ...p.contracts.map(c => `- ${c.name}: \`${c.shape}\``), "");
+  if (p.flow?.length) L.push("## 数据流", ...p.flow.map((s, i) => `${i + 1}. ${s.from} → ${s.to}（${s.payload}）：${s.caption}`), "");
+  ["risks:风险", "tests:测试", "open_questions:待定问题"].forEach(k => { const [f, t] = k.split(":"); if (p[f]?.length) L.push("## " + t, ...p[f].map(x => "- " + x), ""); });
+  if (p.eval) L.push("## 评估", p.eval);
+  return L.join("\n");
+}
+function showProposal(p, source){
+  placeProposal(p); ivState.result = { p, source };
+  load(G.id); anchorMode = true;
+  const si = (G.scenarios || []).findIndex(s => s.proposed);
+  if (si >= 0 && player){ player.select(si); renderScens(si); }
+  renderIntervene();
+}
+async function renderIntervene(){
+  if (!G.intervene) return;
+  const sample = await samplePromise;
+  const r = ivState.result;
+  $("#insp").innerHTML = `<span class="kchip">干预 · 提议一个改动</span><h2>你想给它加什么？</h2>
+    <p>用一句话描述，再在图上<b>点选</b>相关的组件（点选模式已打开，被选中的组件会加粗）。生成的 feature request 只会引用这张图上的组件和文件。</p>
+    <textarea id="ivtext" class="ivtext" placeholder="${esc(G.intervene.placeholder)}">${esc(ivState.text)}</textarea>
+    <div class="crow"><span class="label">已标记</span>${anchors.length ? anchors.map(id => `<button class="cchip" data-un="${id}">${esc((G.nodes.find(n => n.id === id) || {}).label || id)} ×</button>`).join("") : '<span class="hint">还没有，直接点图上的节点</span>'}</div>
+    <div class="dnav">
+      ${sample ? `<button class="btn primary" id="ivgo" ${ivState.busy ? "disabled" : ""}>${ivState.busy ? "生成中…" : "生成 feature request"}</button>${ivState.busy ? '<button class="btn" id="ivstop">停止</button>' : ""}` : `<span class="hint">这个页面打开的方式不能调用 Claude，可以先看示例。</span>`}
+      <button class="btn" id="ivex">看示例</button>
+      <button class="btn" id="ivclose">退出</button>
+    </div>
+    ${ivState.note ? `<p class="hint">${esc(ivState.note)}</p>` : ""}
+    ${r ? proposalHtml(r.p, r.source) : ""}`;
+  wireGoto();
+  $("#ivtext").oninput = e => { ivState.text = e.target.value; };
+  document.querySelectorAll("#insp [data-un]").forEach(b => b.onclick = () => toggleAnchor(b.dataset.un));
+  $("#ivclose").onclick = closeIntervene;
+  $("#ivex").onclick = () => { const ex = G.intervene.example; ivState.text = ex.prompt; anchors = ex.anchors.slice(); ivState.note = ""; showProposal(validateProposal(ex.result), "example"); };
+  const go = $("#ivgo"); if (go) go.onclick = () => generate(sample);
+  const st = $("#ivstop"); if (st) st.onclick = () => ivState.ctl && ivState.ctl.abort();
+  const cp = $("#frcopy"); if (cp && r) cp.onclick = () => { const md = proposalMd(r.p); try { navigator.clipboard.writeText(md).then(() => cp.textContent = "已复制", () => cp.textContent = "复制失败"); } catch (e) { cp.textContent = "复制失败"; } };
+}
+async function generate(sample){
+  const text = ($("#ivtext").value || "").trim(); if (!text){ ivState.note = "先写一句你想加的功能。"; return renderIntervene(); }
+  ivState.text = text; ivState.busy = true; ivState.note = "Claude 在读这张图和相关文件，通常需要 20–60 秒。"; ivState.ctl = new AbortController(); renderIntervene();
+  try {
+    const p = await sample.json(buildPrompt(text), { signal: ivState.ctl.signal, modelTier: "default", onText: ({ text }) => { ivState.note = `正在写… 已生成 ${text.length} 字`; const h = document.querySelector("#insp .hint"); if (h) h.textContent = ivState.note; } });
+    ivState.busy = false; ivState.note = "";
+    if (!p || typeof p !== "object" || !p.title){ ivState.note = "返回的内容不完整，可以再试一次或把描述写得更具体。"; return renderIntervene(); }
+    showProposal(validateProposal(p), "live");
+  } catch (err) {
+    ivState.busy = false;
+    ivState.note = ({ cancelled: "已停止。", not_granted: "没有授权这个页面使用 Claude。可以先看示例。", rate_limited: "调用太频繁，稍后再试。", invalid_json: "返回的不是完整的 JSON，可以再试一次。", prompt_too_large: "上下文太大。" })[err && err.code] || "生成失败，可以再试一次。";
+    renderIntervene();
+  }
+}
+
+/* ---------------- interaction mode: learner profile → route ---------------- */
+let onb = { step: 0, draft: {} };
+function conceptPool(){ const seen = {}; Object.values(GRAPHS).forEach(g => (g.nodes || []).forEach(n => { if (n.kind === "concept" && n.layer === "concept" && !seen[n.id]) seen[n.id] = { id: n.id, label: n.label, g: g.id }; })); return Object.values(seen); }
+function onbQuestions(d){
+  const qs = [{ key: "goal", q: "你这次最想做什么？", sub: "不同目标看的图和顺序不一样。", options: PROFILE.goals }];
+  if (d.goal === "understand" || d.goal === "reproduce") qs.push({ key: "known", multi: true, q: "这些概念里，哪些你已经熟悉？", sub: "熟悉的会被收起，概念路线也会跳过它们。都不熟悉就直接下一步。", options: conceptPool().map(c => ({ id: c.id, label: c.label })) });
+  if (d.goal === "intervene") qs.push({ key: "change", text: true, q: "你想改什么、或者想验证什么假设？", sub: "一句话就行，会带到“提议改动”里。可以留空。", placeholder: PROFILE.changePlaceholder || "" });
+  if (d.goal === "transfer") qs.push({ key: "target", text: true, q: "你想把这些做法用到哪里？", sub: "比如你自己的项目或研究问题。会用来生成迁移实验。", placeholder: PROFILE.targetPlaceholder || "" });
+  qs.push({ key: "time", q: "这次有多少时间？", sub: "决定路线的长度。", options: PROFILE.times });
+  return qs;
+}
+function renderOnb(){
+  const box = $("#onb"); const qs = onbQuestions(onb.draft); const q = qs[onb.step]; box.hidden = false;
+  const val = onb.draft[q.key];
+  box.innerHTML = `<div class="onbcard" role="dialog" aria-label="设定学习目标">
+    <div class="onbtop"><span class="label">开始之前 · ${onb.step + 1} / ${qs.length}</span><button class="linkish" id="onbskip">跳过，直接看全部</button></div>
+    <h2>${esc(q.q)}</h2><p class="hint">${esc(q.sub)}</p>
+    ${q.text ? `<textarea id="onbtext" class="ivtext" placeholder="${esc(q.placeholder)}">${esc(val || "")}</textarea>` :
+      `<div class="onbopts ${q.multi ? "multi" : ""}">${q.options.map(o => { const on = q.multi ? (val || []).includes(o.id) : val === o.id; return `<button class="onbopt" aria-pressed="${on}" data-o="${esc(o.id)}"><b>${esc(o.label)}</b>${o.sub ? `<span>${esc(o.sub)}</span>` : ""}</button>`; }).join("")}</div>`}
+    <div class="dnav"><button class="btn" id="onbback" ${onb.step ? "" : "disabled"}>上一步</button><span class="spacer"></span><button class="btn primary" id="onbnext">${onb.step === qs.length - 1 ? "生成我的路线" : "下一步"}</button></div></div>`;
+  box.querySelectorAll(".onbopt").forEach(b => b.onclick = () => { const id = b.dataset.o;
+    if (q.multi){ const a = new Set(onb.draft[q.key] || []); a.has(id) ? a.delete(id) : a.add(id); onb.draft[q.key] = [...a]; renderOnb(); }
+    else { onb.draft[q.key] = id; if (onb.step < qs.length - 1){ onb.step++; } renderOnb(); } });
+  const t = $("#onbtext"); if (t) t.oninput = e => { onb.draft[q.key] = e.target.value; };
+  $("#onbback").onclick = () => { onb.step = Math.max(0, onb.step - 1); renderOnb(); };
+  $("#onbskip").onclick = () => { box.hidden = true; };
+  $("#onbnext").onclick = () => { if (!q.text && !q.multi && !onb.draft[q.key]) return; if (onb.step < qs.length - 1){ onb.step++; renderOnb(); } else finishOnb(); };
+}
+function finishOnb(){
+  const d = onb.draft; profile = { goal: d.goal, known: d.known || [], time: d.time || "60", change: d.change || "", target: d.target || "", at: Date.now() };
+  store.set("profile", profile); $("#onb").hidden = true;
+  const G0 = PROFILE.goals.find(g => g.id === profile.goal) || {};
+  if (G0.predict !== undefined){ predictOn = G0.predict; store.set("predict", predictOn); applyPredict(); }
+  if (G0.repro !== undefined){ reproOn = G0.repro; store.set("repro", reproOn); applyRepro(); }
+  layers.concept = (profile.goal === "understand" || profile.goal === "reproduce"); store.set("layers", layers);
+  if (profile.change) ivState.text = profile.change;
+  renderProfileChip(); const { route } = routeFrames(); if (route.length) openFrame(route[0]); else renderFrames();
+}
+function renderProfileChip(){
+  const b = $("#profb"); if (!b) return;
+  if (!profile){ b.textContent = "设定目标"; return; }
+  const goal = (PROFILE.goals.find(g => g.id === profile.goal) || {}).label || "";
+  const unknown = conceptPool().length - (profile.known || []).length;
+  const pr = predictLog.length ? ` · 预测 ${predictLog.filter(x => x.ok).length}/${predictLog.length}` : "";
+  b.textContent = `${goal} · ${(PROFILE.times.find(t => t.id === profile.time) || {}).label || ""} · ${unknown} 个概念待学${pr}`;
+}
+$("#profb").onclick = () => { onb = { step: 0, draft: profile ? { ...profile } : {} }; renderOnb(); };
+
+/* ---------------- boot ---------------- */
+const hash = (location.hash||"").slice(1).replace(/-/g,".");
+if (hash && GRAPHS[hash]) { const p = pathTo(hash); if (p) stack = p; }
+load(stack[stack.length-1]); renderTrail(); applyRepro(); applyPredict(); renderProfileChip();
+if (!profile && PAGE.defaultProfile) { onb = { step: 0, draft: { ...PAGE.defaultProfile } }; finishOnb(); }
+else if (!profile && PROFILE.goals.length && !hash) { onb = { step: 0, draft: {} }; renderOnb(); }
+window.addEventListener("resize", () => {});

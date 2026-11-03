@@ -1,0 +1,97 @@
+{
+ "clean": {
+  "raw": "[{\"type\":\"action\",\"name\":\"spotlight\",\"params\":{\"elementId\":\"t-b1\"}},{\"type\":\"text\",\"content\":\"先看这条公式：对称轴 x = -b/(2a)。\"},{\"type\":\"action\",\"name\":\"wb_open\",\"params\":{}},{\"type\":\"text\",\"content\":\"我们在白板上推导一下。\"}]",
+  "scene": "slide",
+  "allowed": null,
+  "actions": [
+   {
+    "type": "spotlight",
+    "elementId": "t-b1"
+   },
+   {
+    "type": "speech",
+    "text": "先看这条公式：对称轴 x = -b/(2a)。"
+   },
+   {
+    "type": "wb_open"
+   },
+   {
+    "type": "speech",
+    "text": "我们在白板上推导一下。"
+   }
+  ]
+ },
+ "fenced_trailing_comma": {
+  "raw": "```json\n[{\"type\":\"text\",\"content\":\"光反应发生在类囊体膜上。\"},{\"type\":\"action\",\"name\":\"laser\",\"params\":{\"elementId\":\"img-1\"}},]\n```",
+  "scene": "slide",
+  "allowed": null,
+  "actions": [
+   {
+    "type": "speech",
+    "text": "光反应发生在类囊体膜上。"
+   },
+   {
+    "type": "laser",
+    "elementId": "img-1"
+   }
+  ]
+ },
+ "truncated_stream": {
+  "raw": "[{\"type\":\"text\",\"content\":\"暗反应在叶绿体基质中进行，\"},{\"type\":\"text\",\"content\":\"它需要光反应产生的 ATP 和 NAD",
+  "scene": "slide",
+  "allowed": null,
+  "actions": [
+   {
+    "type": "speech",
+    "text": "暗反应在叶绿体基质中进行，"
+   },
+   {
+    "type": "speech",
+    "text": "它需要光反应产生的 ATP 和 NAD"
+   }
+  ]
+ },
+ "discussion_not_last": {
+  "raw": "[{\"type\":\"text\",\"content\":\"大家怎么看？\"},{\"type\":\"action\",\"name\":\"discussion\",\"params\":{\"topic\":\"为什么 a 决定开口方向\"}},{\"type\":\"text\",\"content\":\"这句会被丢掉\"}]",
+  "scene": "slide",
+  "allowed": null,
+  "actions": [
+   {
+    "type": "speech",
+    "text": "大家怎么看？"
+   },
+   {
+    "type": "discussion",
+    "topic": "为什么 a 决定开口方向"
+   }
+  ]
+ },
+ "quiz_scene_strips_spotlight": {
+  "raw": "[{\"type\":\"action\",\"name\":\"spotlight\",\"params\":{\"elementId\":\"q1\"}},{\"type\":\"text\",\"content\":\"做第一题。\"}]",
+  "scene": "quiz",
+  "allowed": null,
+  "actions": [
+   {
+    "type": "speech",
+    "text": "做第一题。"
+   }
+  ]
+ },
+ "student_whitelist": {
+  "raw": "[{\"type\":\"text\",\"content\":\"老师我来！\"},{\"type\":\"action\",\"name\":\"laser\",\"params\":{\"elementId\":\"t-b1\"}},{\"type\":\"action\",\"name\":\"wb_draw_text\",\"params\":{\"content\":\"x=-b/2a\"}}]",
+  "scene": "slide",
+  "allowed": [
+   "wb_draw_text"
+  ],
+  "actions": [
+   {
+    "type": "speech",
+    "text": "老师我来！"
+   },
+   {
+    "type": "wb_draw_text",
+    "content": "x=-b/2a"
+   }
+  ]
+ }
+}

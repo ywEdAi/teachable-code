@@ -1,0 +1,261 @@
+{
+ "gk": {
+  "prompt": "Let's read the following passage and produce a list of implications derived directly or indirectly from the content.\n\nPassage:\nApollo 11\nApollo 11 was the first crewed mission to land on the Moon. Neil Armstrong and Buzz Aldrin landed the lunar module Eagle on July 20, 1969, while Michael Collins remained in lunar orbit.\n\nImplications:\n",
+  "completion": "1. The first crewed Moon landing happened in 1969.\n2. Neil Armstrong and Buzz Aldrin were the two astronauts who walked on the Moon during Apollo 11.\n3. Michael Collins did not land on the Moon; he stayed in orbit.\n4. The lunar module of Apollo 11 was named Eagle.",
+  "seqs_default": [
+   "Apollo 11\n1. The first crewed Moon landing happened in 1969.\n2. Neil Armstrong and Buzz Aldrin were the two astronauts who walked on the Moon during Apollo 11.\n3. Michael Collins did not land on the Moon; he stayed in orbit.\n4. The lunar module of Apollo 11 was named Eagle.",
+   "Apollo 11\nApollo 11 was the first crewed mission to land on the Moon. Neil Armstrong and Buzz Aldrin landed the lunar module Eagle on July 20, 1969, while Michael Collins remained in lunar orbit."
+  ],
+  "seqs_split": [
+   "Apollo 11\n1. The first crewed Moon landing happened in 1969.",
+   "Apollo 11\n2. Neil Armstrong and Buzz Aldrin were the two astronauts who walked on the Moon during Apollo 11.",
+   "Apollo 11\n3. Michael Collins did not land on the Moon; he stayed in orbit.",
+   "Apollo 11\n4. The lunar module of Apollo 11 was named Eagle.",
+   "Apollo 11\nApollo 11 was the first crewed mission to land on the Moon. Neil Armstrong and Buzz Aldrin landed the lunar module Eagle on July 20, 1969, while Michael Collins remained in lunar orbit."
+  ]
+ },
+ "em": {
+  "comps": [
+   {
+    "text": "self-edit A (restates passage)",
+    "stats": {
+     "adapter_mean": 0.33
+    }
+   },
+   {
+    "text": "self-edit B (lists implications)",
+    "stats": {
+     "adapter_mean": 0.67
+    }
+   },
+   {
+    "text": "self-edit C (off-topic)",
+    "stats": {
+     "adapter_mean": 0.0
+    }
+   },
+   {
+    "text": "self-edit D (Q&A pairs)",
+    "stats": {
+     "adapter_mean": 0.56
+    }
+   },
+   {
+    "text": "self-edit E (very long)",
+    "stats": {
+     "adapter_mean": 0.44
+    }
+   }
+  ],
+  "best": [
+   "self-edit B (lists implications)"
+  ],
+  "allzero": [
+   "x"
+  ]
+ },
+ "arc": {
+  "grid": [
+   [
+    1,
+    1,
+    0
+   ],
+   [
+    0,
+    2,
+    0
+   ],
+   [
+    0,
+    0,
+    0
+   ]
+  ],
+  "aug_counts": {
+   "1000": 11,
+   "1100": 14,
+   "1110": 20,
+   "1111": 23,
+   "0000": 0
+  },
+  "aug_names": [
+   "Rotate(90)",
+   "Rotate(270)",
+   "Rotate(180)",
+   "Flip(0)",
+   "Flip(1)",
+   "Reflect(0, reverse=True)",
+   "Reflect(1, reverse=True)",
+   "Reflect(0, reverse=False)",
+   "Reflect(1, reverse=False)",
+   "RandomTranslateXY()",
+   "Transpose()",
+   "IncreaseResolution(2)",
+   "IncreaseHeight(2)",
+   "IncreaseWidth(2)",
+   "Chain([Rotate(90), IncreaseResolution(2)])",
+   "Chain([Rotate(270), IncreaseResolution(2)])",
+   "Chain([Rotate(180), IncreaseResolution(2)])",
+   "Chain([Flip(0), IncreaseResolution(2)])",
+   "Chain([Flip(1), IncreaseResolution(2)])",
+   "Chain([Transpose(), IncreaseResolution(2)])",
+   "Repeat(0, 2)",
+   "Repeat(1, 2)",
+   "Repeat(2, 2)"
+  ],
+  "shown": {
+   "Rotate(90)": [
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     2,
+     0
+    ],
+    [
+     1,
+     0,
+     0
+    ]
+   ],
+   "Flip(0)": [
+    [
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     2,
+     0
+    ],
+    [
+     1,
+     1,
+     0
+    ]
+   ],
+   "Transpose()": [
+    [
+     1,
+     0,
+     0
+    ],
+    [
+     1,
+     2,
+     0
+    ],
+    [
+     0,
+     0,
+     0
+    ]
+   ],
+   "IncreaseResolution(2)": [
+    [
+     1,
+     1,
+     1,
+     1,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     1,
+     1,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   "Chain([Rotate(90), IncreaseResolution(2)])": [
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     2,
+     2,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     0,
+     0,
+     0,
+     0
+    ]
+   ]
+  }
+ }
+}

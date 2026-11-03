@@ -1,0 +1,109 @@
+{
+ "confident (Q: capital of France?)": {
+  "responses": [
+   "Paris",
+   "It's Paris",
+   "Paris",
+   "The capital is Paris",
+   "Paris, France",
+   "Paris",
+   "Paris",
+   "It's Paris",
+   "Paris",
+   "Paris"
+  ],
+  "semantic_ids": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "nli_calls": 18,
+  "distinct_strings": 4,
+  "clusters": 1,
+  "cluster_assignment_entropy": -0.0,
+  "semantic_entropy_rao": -0.0,
+  "regular_entropy": 0.25,
+  "logsumexp_sum_agg_quirk": [
+   -2.93
+  ]
+ },
+ "lexically diverse but semantically sure (Q: when did Titanic sink?)": {
+  "responses": [
+   "1912",
+   "April 1912",
+   "In 1912",
+   "It sank in 1912",
+   "1912",
+   "april 1912",
+   "in 1912",
+   "1912",
+   "It sank in 1912",
+   "April 1912"
+  ],
+  "semantic_ids": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "nli_calls": 18,
+  "distinct_strings": 4,
+  "clusters": 1,
+  "cluster_assignment_entropy": -0.0,
+  "semantic_entropy_rao": -0.0,
+  "regular_entropy": 0.76,
+  "logsumexp_sum_agg_quirk": [
+   -3.402
+  ]
+ },
+ "confabulating (Q: obscure fact)": {
+  "responses": [
+   "1912",
+   "1915",
+   "1913",
+   "1915",
+   "1912",
+   "1913",
+   "1915",
+   "1912",
+   "1913",
+   "1915"
+  ],
+  "semantic_ids": [
+   0,
+   1,
+   2,
+   1,
+   0,
+   2,
+   1,
+   0,
+   2,
+   1
+  ],
+  "nli_calls": 48,
+  "distinct_strings": 3,
+  "clusters": 3,
+  "cluster_assignment_entropy": 1.089,
+  "semantic_entropy_rao": 1.075,
+  "regular_entropy": 1.19,
+  "logsumexp_sum_agg_quirk": [
+   -5.098,
+   -4.711,
+   -5.198
+  ]
+ }
+}

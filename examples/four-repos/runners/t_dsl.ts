@@ -1,0 +1,13 @@
+import { validateScene, validateAction, normalizeScene } from '@openmaic/dsl';
+import fs from 'node:fs';
+const sc = JSON.parse(fs.readFileSync(process.env.REPO + '/eval/orchestration/scenarios/answer-content.json','utf8'))[0].scene;
+const out: any = {};
+const scene = { id: sc.id, stageId: 'stage-1', title: sc.title, type: sc.type, order: 0, content: sc.content, actions: [] };
+out.realScene = validateScene(scene);
+out.realSceneElements = sc.content.canvas.elements.map((e:any)=>({id:e.id,type:e.type,textType:e.textType,left:e.left,top:e.top,width:e.width,height:e.height,content:(e.content||'').replace(/<[^>]+>/g,'').slice(0,40)}));
+const badAct = { id:'a1', type:'teleport', elementId:'x' };
+out.badAction = validateAction(badAct);
+out.goodAction = validateAction({ id:'a2', type:'spotlight', elementId:'t-b1' });
+out.speech = validateAction({ id:'a3', type:'speech', text:'对称轴 x = -b/(2a)' });
+console.log(JSON.stringify(out, null, 1).slice(0, 3000));
+fs.writeFileSync(process.argv[2], JSON.stringify(out, null, 1));

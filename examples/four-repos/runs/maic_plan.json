@@ -1,0 +1,130 @@
+{
+ "crashed": true,
+ "trace": [
+  {
+   "next": "material-analysis",
+   "state": "preparing"
+  },
+  {
+   "next": "research",
+   "state": "preparing"
+  },
+  {
+   "next": "outline",
+   "state": "outlining"
+  },
+  {
+   "next": "await-outline-confirmation"
+  },
+  {
+   "next": "agents",
+   "state": "generating"
+  },
+  {
+   "next": "scene:0:content",
+   "state": "generating"
+  },
+  {
+   "next": "scene:0:actions",
+   "state": "generating"
+  },
+  {
+   "next": "scene:0:narration",
+   "state": "generating"
+  },
+  {
+   "next": "scene:1:content",
+   "state": "generating"
+  },
+  {
+   "next": "scene:1:actions",
+   "state": "generating"
+  },
+  {
+   "event": "worker crash → lease expires → another worker resumes; checkpoints so far: 8"
+  },
+  {
+   "next": "scene:1:actions",
+   "state": "generating"
+  },
+  {
+   "next": "scene:1:narration",
+   "state": "generating"
+  },
+  {
+   "next": "scene:2:content",
+   "state": "generating"
+  },
+  {
+   "next": "scene:2:actions",
+   "state": "generating"
+  },
+  {
+   "next": "scene:2:narration",
+   "state": "generating"
+  },
+  {
+   "next": "complete"
+  }
+ ],
+ "outlinePrompt": {
+  "systemChars": 17536,
+  "systemHead": "# Scene Outline Generator\n\nYou are a professional course content designer, skilled at transforming user requirements into structured scene outlines.\n\n## Core Task\n\nBased on the user's free-form requirement text, automatically infer course details and generate a series of scene outlines (SceneOutline).\n\n**Key Capabilities**:\n\n1. Extract from requirement text: topic, target audience, duration, style, etc.\n2. Make reasonable default assumptions when information is insufficient\n3. Generate structured outlines to prepare for subsequent teaching action generation\n\n---\n\n## Language Inference\n\nInfer the course language from all available signals and produce:\n\n1. **`languageDirective`** (required): A",
+  "user": "Please generate scene outlines based on the following course requirements.\n\n---\n\n## User Requirements\n\n给初二学生讲光合作用，15 分钟，要有一个互动模拟和一个小测验\n\n---\n\n\n\n## Language Context\n\nInfer the course language directive by applying the decision rules from the system prompt. Key reminders:\n- Requirement language = teaching language (unless overridden by explicit request or learner context)\n- Foreign language learning → teach in user's native language, not the target language\n- PDF language does NOT override teaching language — translate/explain document content instead\n\n---\n\n## Reference Materials\n\n### PDF Content Summary\n\nNone\n\n### Available Images\n\nNo images available\n\n### Web Search Results\n\nNone\n\n\n\n---\n\n## Output Requirements\n\nPlease automatically infer the following from user requirements:\n\n- Course topic and core content\n- Target audience and difficulty level\n- Course duration (default 15-30 minutes if not specified)\n- Teaching style (formal/casual/interactive/academic)\n- Visual style (minimal/colorful/professional/playful)\n\nThen output your response as a single JSON object.\n\n**Top-level shape — this is what you MUST return:**\n\n```json\n{\n  \"languageDirective\": \"2-5 sentence instruction describing the course language behavior\",\n  \"courseTitle\": \"concise course name, ≤30 chars, in the teaching language\",\n  \"outlines\": [ /* array of scene objects, schema described below */ ]\n}\n```\n\nNever return a bare array. Never omit `languageDirective` or `courseTitle`. All three keys are required.\n\n**Each scene inside the `outlines` array has this minimum shape:**\n\n```json\n{\n  \"id\": \"scene_1\",\n  \"type\": \"slide\" | \"quiz\" | \"interactive\" | \"pbl\",\n  \"title\": \"Scene Title\",\n  \"description\": \"Teaching purpose description\",\n  \"keyPoints\": [\"Point 1\", \"Point 2\", \"Point 3\"],\n  \"order\": 1\n}\n```\n\n### Special Notes\n\n- **quiz scenes must include quizConfig**:\n   ```json\n   \"quizConfig\": {\n     \"questionCount\": 2,\n     \"difficulty\": \"easy\" | \"medium\" | \"hard\",\n     \"questionTypes\": [\"single\", \"multiple\"]\n   }\n   ```\n\n- **Interactive scenes**: If a concept benefits from hands-on simulation/visualization, use `\"type\": \"interactive\"` with `widgetType` and `widgetOutline` fields. Limit to 1-2 per course.\n   - Select widgetType based on concept: simulation (physics/chem), diagram (processes), code (programming), game (practice), visualization3d (3D models)\n   - Provide appropriate widgetOutline for the widget type\n- **Scene count**: Based on inferred duration, typically 1-2 scenes per minute\n- **Quiz placement**: Recommend inserting a quiz every 3-5 slides for assessment\n- **Language**: Infer from the user's requirement text and context, then output all content in the inferred language\n- **If web search results are provided**, reference specific findings and sources in scene descriptions and keyPoints. The search results provide up-to-date information — incorporate it to make the course content current and accurate.\n\n**Final reminder**: your entire response must be a JSON **object** with exactly three top-level keys — `languageDirective` (string), `courseTitle` (string, ≤30 chars, in the teaching language), and `outlines` (array). Do not return a bare array. Do not wrap in prose or code fences."
+ },
+ "slideActionsSystemHead": "# Slide Action Generator\n\nYou are a professional instructional designer responsible for generating teaching action sequences for slide scenes.\n\n## Core Task\n\nBased on the slide's element list, key points, and description, generate a series of teaching actions to make the presentation more engaging and well-paced.\n\n---\n\n## Output Format\n\nYou MUST output a JSON array directly. Each element is an object with a `type` field:\n\n```json\n[\n  {\n    \"type\": \"action\",\n    \"name\": \"spotlight\",\n    \"params\": { \"elementId\": \"text_abc123\" }\n  },\n  { \"type\": \"text\", \"content\": \"First, let's look at the key concept...\" },\n  {\n    \"type\": \"action\",\n    \"name\": \"spotlight\",\n    \"params\": { \"elementId\": \"chart_001\" }\n  },\n  {\n    \"type\": \"text\",\n    \"content\": \"Now observe this chart showing the relationship...\"\n  }\n]\n```\n\n### Format Rules\n\n1. Output a single JSON array — no explanation, no code fences\n2. `type:\"action\"` objects contain `name` and `params`\n3. `type:\"text\"` objects contain `content` (speech text)\n4. Action and text objects can freely interleave in any order\n5. The `]` closing bracket marks the end of your response\n\n### Ordering Principles\n\n- spotlight actions should appear BEFORE the corresponding text object (point first, then speak)\n- Multiple spotlight+text pairs create a natural \"focus then explain\" flow\n\n---\n\n## Action Types\n\n### spotlight (Focus Element)\n\nHighlight a specific element on the slide, used in conjunction with narration.\n\n```json\n{\n  \"type\": \"action\",\n  \"name\": \"spotlight\",\n  \"params\": { \"elementId\": \"text_abc123\" }\n}\n```\n\n- `elementId`: ID of element to focus",
+ "templates": [
+  {
+   "t": "code-content",
+   "systemLines": 239
+  },
+  {
+   "t": "diagram-content",
+   "systemLines": 166
+  },
+  {
+   "t": "game-content",
+   "systemLines": 434
+  },
+  {
+   "t": "interactive-actions",
+   "systemLines": 119
+  },
+  {
+   "t": "pbl-actions",
+   "systemLines": 54
+  },
+  {
+   "t": "procedural-skill-content",
+   "systemLines": 362
+  },
+  {
+   "t": "quiz-actions",
+   "systemLines": 85
+  },
+  {
+   "t": "quiz-content",
+   "systemLines": 170
+  },
+  {
+   "t": "requirements-to-outlines",
+   "systemLines": 387
+  },
+  {
+   "t": "simulation-content",
+   "systemLines": 325
+  },
+  {
+   "t": "slide-actions",
+   "systemLines": 181
+  },
+  {
+   "t": "slide-content",
+   "systemLines": 940
+  },
+  {
+   "t": "visualization3d-content",
+   "systemLines": 671
+  }
+ ]
+}

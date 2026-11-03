@@ -1,0 +1,6 @@
+{
+  "sep":  {"name": "semantic-entropy-probes", "root": "/root/repos/semantic-entropy-probes", "url": "https://github.com/OATML/semantic-entropy-probes/blob/02e2167dd1c00e27080d421f9b40e13e00f0452b/"},
+  "sgl":  {"name": "mini-sglang", "root": "/root/repos/mini-sglang", "url": "https://github.com/sgl-project/mini-sglang/blob/9a91cfafe754aa85daee49998176275667eb58f2/"},
+  "seal": {"name": "SEAL", "root": "/root/repos/SEAL", "url": "https://github.com/Continual-Intelligence/SEAL/blob/6d9c9f9ee392c6cc618e771f399d436d190f6ca4/"},
+  "maic": {"name": "OpenMAIC", "root": "/root/repos/OpenMAIC", "url": "https://github.com/THU-MAIC/OpenMAIC/blob/70859b42e71497693f7cca812b87306535d5fdfb/"}
+}

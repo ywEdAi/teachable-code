@@ -1,0 +1,68 @@
+{
+ "realScene": {
+  "valid": true
+ },
+ "realSceneElements": [
+  {
+   "id": "t-title",
+   "type": "text",
+   "textType": "title",
+   "left": 80,
+   "top": 50,
+   "width": 780,
+   "height": 80,
+   "content": "二次函数 y = ax² + bx + c"
+  },
+  {
+   "id": "t-b1",
+   "type": "text",
+   "left": 100,
+   "top": 175,
+   "width": 720,
+   "height": 60,
+   "content": "开口方向由 a 的正负决定"
+  },
+  {
+   "id": "t-b2",
+   "type": "text",
+   "left": 100,
+   "top": 245,
+   "width": 720,
+   "height": 60,
+   "content": "顶点是抛物线的最高或最低点"
+  },
+  {
+   "id": "t-b3",
+   "type": "text",
+   "left": 100,
+   "top": 315,
+   "width": 720,
+   "height": 60,
+   "content": "对称轴是过顶点的竖直线"
+  },
+  {
+   "id": "l-1",
+   "type": "latex",
+   "left": 540,
+   "top": 380,
+   "width": 300,
+   "height": 80,
+   "content": ""
+  }
+ ],
+ "badAction": {
+  "valid": false,
+  "errors": [
+   {
+    "path": "/type",
+    "message": "unknown action type: \"teleport\""
+   }
+  ]
+ },
+ "goodAction": {
+  "valid": true
+ },
+ "speech": {
+  "valid": true
+ }
+}

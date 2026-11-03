@@ -1,0 +1,15 @@
+{
+  "sep": "runs/sep_entropy.json",
+  "radix": "runs/sgl_radix.json",
+  "probe": "runs/sep_probe.json",
+  "seal": "runs/seal_cpu.json",
+  "maic.action": "runs/maic_action.json",
+  "maic.dsl": "runs/maic_dsl.json",
+  "maic.plan": "runs/maic_plan.json",
+  "maic.cls": "runs/maic_class.json",
+  "maic.answering": "runs/maic_answering.json",
+  "maicFiles": "runs/maic_files.json",
+  "seal2.estep": "runs/seal_estep.json",
+  "seal2.levers": "runs/seal_levers.json",
+  "seal2.inv": "runs/seal_inventory.json"
+}

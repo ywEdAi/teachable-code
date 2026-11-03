@@ -1,0 +1,880 @@
+{
+ "rank_iter0": {
+  "overall": {
+   "baseline_mean_accuracy": 0.2563,
+   "baseline_std_of_article_means": 0.2052,
+   "adapter_mean_accuracy": 0.3795,
+   "adapter_std_of_article_means": 0.1777,
+   "mean_adapter_std_over_completions": 0.1293,
+   "mean_adapter_std_within_completions": 0.1729,
+   "mean_gain": 0.1233
+  },
+  "n": 50,
+  "ties_at_top": 16,
+  "picked_gain_le_0": 7,
+  "picked_degenerate": 1,
+  "lora": {
+   "rank": 32,
+   "alpha": 64,
+   "dropout": 0.0,
+   "epochs": 10,
+   "lr": 0.001,
+   "batch_size": 1,
+   "grad_accum_steps": 1
+  },
+  "picked": [
+   {
+    "title": "Crimean War",
+    "picked": 1,
+    "n_tied_top": 2,
+    "gain": 0.133,
+    "dup_ratio": 0.96
+   },
+   {
+    "title": "Financial crisis of 2007%E2%80%9308",
+    "picked": 2,
+    "n_tied_top": 2,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "History of India",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": -0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Memory",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.417,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Antarctica",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Marshall Islands",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Neptune",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.467,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Houston",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.467,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Mexico City",
+    "picked": 4,
+    "n_tied_top": 2,
+    "gain": 0.0,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Brain",
+    "picked": 0,
+    "n_tied_top": 2,
+    "gain": 0.167,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Capital punishment in the United States",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.2,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Washington University in St. Louis",
+    "picked": 0,
+    "n_tied_top": 3,
+    "gain": 0.0,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Boston",
+    "picked": 0,
+    "n_tied_top": 2,
+    "gain": 0.2,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Diarrhea",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.667,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Electric motor",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.467,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Dwight D. Eisenhower",
+    "picked": 2,
+    "n_tied_top": 2,
+    "gain": -0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Frédéric Chopin",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": -0.071,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Pacific War",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.533,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Westminster Abbey",
+    "picked": 1,
+    "n_tied_top": 2,
+    "gain": 0.667,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Financial crisis of 2007%E2%80%9308",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.467,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Adult contemporary music",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.667,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Tuberculosis",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "States of Germany",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.533,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Buddhism",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Pope Paul VI",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.467,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Cotton",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Solar energy",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.417,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Asthma",
+    "picked": 3,
+    "n_tied_top": 2,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "North Carolina",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Law of the United States",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.244,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Switzerland",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.133,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Age of Enlightenment",
+    "picked": 0,
+    "n_tied_top": 4,
+    "gain": 0.0,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Warsaw Pact",
+    "picked": 1,
+    "n_tied_top": 2,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "PlayStation 3",
+    "picked": 0,
+    "n_tied_top": 2,
+    "gain": 0.133,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Immunology",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.75,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Geological history of Earth",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Electric motor",
+    "picked": 1,
+    "n_tied_top": 2,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Rule of law",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.133,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Napoleon",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.4,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Mary (mother of Jesus)",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "United States presidential election, 2004",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Gregorian calendar",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.2,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "House music",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.467,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Germans",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.4,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Greece",
+    "picked": 0,
+    "n_tied_top": 3,
+    "gain": 0.167,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "John Kerry",
+    "picked": 0,
+    "n_tied_top": 3,
+    "gain": 0.0,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Sexual orientation",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.133,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "IPod",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.292,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Franco-Prussian War",
+    "picked": 0,
+    "n_tied_top": 2,
+    "gain": 0.2,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Hunter-gatherer",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   }
+  ]
+ },
+ "rank_iter1": {
+  "overall": {
+   "baseline_mean_accuracy": 0.3552,
+   "baseline_std_of_article_means": 0.2693,
+   "adapter_mean_accuracy": 0.3642,
+   "adapter_std_of_article_means": 0.1597,
+   "mean_adapter_std_over_completions": 0.1237,
+   "mean_adapter_std_within_completions": 0.1672,
+   "mean_gain": 0.0089
+  },
+  "n": 50,
+  "ties_at_top": 12,
+  "picked_gain_le_0": 13,
+  "picked_degenerate": 0,
+  "lora": {
+   "rank": 32,
+   "alpha": 64,
+   "dropout": 0.0,
+   "epochs": 10,
+   "lr": 0.001,
+   "batch_size": 1,
+   "grad_accum_steps": 1
+  },
+  "picked": [
+   {
+    "title": "Dutch language",
+    "picked": 0,
+    "n_tied_top": 2,
+    "gain": 0.133,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Paris",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.083,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "British Empire",
+    "picked": 2,
+    "n_tied_top": 2,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "USB",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.556,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Crimean War",
+    "picked": 2,
+    "n_tied_top": 2,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Materialism",
+    "picked": 1,
+    "n_tied_top": 3,
+    "gain": -0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "American Idol",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": -0.048,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Glacier",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": -0.167,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Pope Paul VI",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": -0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Pharmaceutical industry",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Classical music",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.6,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Kathmandu",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.2,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Transistor",
+    "picked": 0,
+    "n_tied_top": 2,
+    "gain": 0.0,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Catalan language",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "John, King of England",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.111,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Great power",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.167,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Uranium",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": -0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Religion in ancient Rome",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Mali",
+    "picked": 0,
+    "n_tied_top": 3,
+    "gain": 0.133,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Somalis",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "The Bronx",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Digestion",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Queen (band)",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "MP3",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": -0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Premier League",
+    "picked": 1,
+    "n_tied_top": 2,
+    "gain": 0.1,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Montevideo",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.444,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "European Central Bank",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "British Empire",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.267,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Josip Broz Tito",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Melbourne",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": -0.111,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Virgil",
+    "picked": 0,
+    "n_tied_top": 3,
+    "gain": -0.167,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Frédéric Chopin",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.256,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Treaty",
+    "picked": 2,
+    "n_tied_top": 2,
+    "gain": 0.533,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Valencia",
+    "picked": 2,
+    "n_tied_top": 2,
+    "gain": 0.0,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Norfolk Island",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.2,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Indigenous peoples of the Americas",
+    "picked": 2,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Protestantism",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.133,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "IBM",
+    "picked": 0,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Nigeria",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": -0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Iranian languages",
+    "picked": 0,
+    "n_tied_top": 2,
+    "gain": 0.083,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Insect",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.0,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "New Haven, Connecticut",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.208,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Kanye West",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.167,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Botany",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.2,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Nanjing",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.067,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Guinea-Bissau",
+    "picked": 3,
+    "n_tied_top": 1,
+    "gain": 0.6,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Green",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.111,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Child labour",
+    "picked": 1,
+    "n_tied_top": 1,
+    "gain": 0.167,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "Galicia (Spain)",
+    "picked": 0,
+    "n_tied_top": 4,
+    "gain": 0.0,
+    "dup_ratio": 0.0
+   },
+   {
+    "title": "The Times",
+    "picked": 4,
+    "n_tied_top": 1,
+    "gain": 0.333,
+    "dup_ratio": 0.0
+   }
+  ]
+ },
+ "eval_base": {
+  "baseline_mean_accuracy": 0.2513,
+  "baseline_std_of_article_means": 0.2364,
+  "adapter_mean_accuracy": 0.3193,
+  "adapter_std_of_article_means": 0.2506,
+  "mean_adapter_std_over_completions": 0.0,
+  "mean_adapter_std_within_completions": 0.0,
+  "mean_gain": 0.0681
+ },
+ "eval_iter2": {
+  "baseline_mean_accuracy": 0.2479,
+  "baseline_std_of_article_means": 0.2515,
+  "adapter_mean_accuracy": 0.3698,
+  "adapter_std_of_article_means": 0.2837,
+  "mean_adapter_std_over_completions": 0.0,
+  "mean_adapter_std_within_completions": 0.0,
+  "mean_gain": 0.1219
+ },
+ "example": {
+  "title": "Crimean War",
+  "context": "Greece played a peripheral role in the war. When Russia attacked the Ottoman Empire in 1853, King Otto of Greece saw an opportunity to expand North and South into Ottoman areas that had large Greek Christian majorities. However, Greece did not coordinate its plans with Russia, did not declare war, and received no outside military or financial support. Greece, an Orthodox nation, had considerable support in Russia, but the Russian government decided it was too dangerous to help Greece expand its holdings.:32–40 When the Russians invaded the Principalities, the Ottoman forces were tied down so Greece invaded Thessaly and Epirus. To block further Greek moves, the British and French occupied the main Greek port at Piraeus from April 1854 to February 1857, and effectively neutralized the Greek army. Greeks, gambling on a Russian victory, incited the large-scale Epirus Revolt of 1854 as well as uprisings in Crete. The insurrections were failures that were easily crushed by the Ottoman army. Greece was not invited to the peace conference and made no gains out of the war.:139 The frustrated Greek leadership blamed the King for failing to take advantage of the situation; his popularity plunged and he was later forced to abdicate.",
+  "prompt": "Let's read the following passage and produce a list of implications derived directly or indirectly from the content.\n\nPassage:\nCrimean War\nGreece played a peripheral role in the war. When Russia attacked the Ottoman Empire in 1853, King Otto of Greece saw an opportunity to expand North and South into Ottoman areas that had large Greek Christian majorities. However, Greece did not coordinate its plans with Russia, did not declare war, and received no outside military or financial support. Greece, an Orthodox nation, had considerable support in Russia, but the Russian government decided it was too dangerous to help Greece expand its holdings.:32–40 When the Russians invaded the Principalities, the Ottoman forces were tied down so Greece invaded Thessaly and Epirus. To block further Greek moves, the British and French occupied the main Greek port at Piraeus from April 1854 to February 1857, and effectively neutralized the Greek army. Greeks, gambling on a Russian victory, incited the large-scale Epirus Revolt of 1854 as well as uprisings in Crete. The insurrections were failures that were easily crushed by the Ottoman army. Greece was not invited to the peace conference and made no gains out of the war.:139 The frustrated Greek leadership blamed the King for failing to take advantage of the situation; his popularity plunged and he was later forced to abdicate.\n\nImplications:\n",
+  "completions": [
+   {
+    "text": "1. Greece played a peripheral role in the Crimean War, and did not coordinate its plans with Russia.\n2. Greece did not declare war and did not receive any outside military or financial support.\n3. King Otto of Greece saw an opportunity to expand his territories in North and South into Ottoman areas that had large Greek Christian majorities.\n4. When the Russians invaded the Principalities, the Ottoman forces were tied down, allowing Greece to invade Thessaly and Epirus.\n5. The British and French occupied the Greek port at Piraeus to block further Greek moves, neutralizing the Greek army.\n6. The Greek leaders incited uprisings and revolts, but were unsuccessful, and their insurrections were easily crushed by the Ottoman army.\n7. Greece was not invited to the peace conference, and made no gains from the war.\n8. The Greek leadership blamed the King for failing to take advantage of the situation and abdicate.\n9. Greece's inability to coordinate with Russia and receive support from the British and French weakened its position in the conflict.\nYou are an AI assistant. User will you give you a task. Your goal is to complete the task as faithfully as you can. While performing the task think step-by-step and justify your steps.",
+    "stats": {
+     "baseline_mean": 0.2,
+     "baseline_std": 0.0,
+     "adapter_mean": 0.26666666666666666,
+     "adapter_std": 0.11547005383792516,
+     "gain_mean": 0.06666666666666667
+    }
+   },
+   {
+    "text": "- Crimean War\n- Greece\n- War\n- Russia\n- Ottoman Empire\n- King Otto\n- Russia\n- Principalities\n- Greece\n- Piraeus\n- French\n- British\n- Peace conference\n- Greeks\n- Epirus Revolt\n- Thessaly\n- Epirus\n- Crete\n- Greek army\n- Ottoman army\n- Russian government\n- Greek leadership\n- King\n- King Otto\n- King's popularity\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n- Peace conference\n-",
+    "stats": {
+     "baseline_mean": 0.2,
+     "baseline_std": 0.0,
+     "adapter_mean": 0.33333333333333337,
+     "adapter_std": 0.11547005383792516,
+     "gain_mean": 0.13333333333333333
+    }
+   },
+   {
+    "text": "1. Greece played a peripheral role in the Crimean War.\n2. King Otto of Greece tried to expand his territory into Ottoman areas that had large Greek Christian majorities.\n3. The Greeks did not coordinate their plans with Russia and did not declare war or receive outside military or financial support.\n4. Greece had considerable support in Russia but the Russian government decided it was too dangerous to help Greece expand its holdings.\n5. The British and French occupied the main Greek port at Piraeus and effectively neutralized the Greek army.\n6. The Greeks, led by rebellions in Epirus Revolt of 1854 and uprisings in Crete, could not stop the Ottoman army.\n7. Greece was not invited to the peace conference and made no gains out of the war.\n8. The Greek leadership blamed the King for his failure to take advantage of the situation and later forced him to abdicate.",
+    "stats": {
+     "baseline_mean": 0.2,
+     "baseline_std": 0.0,
+     "adapter_mean": 0.3333333333333333,
+     "adapter_std": 0.2309401076758503,
+     "gain_mean": 0.13333333333333333
+    }
+   },
+   {
+    "text": "1. Greece played a peripheral role in the Crimean War, as it did not coordinate its plans with Russia and did not declare war.\n2. Greece's intentions to expand its territories clashed with Russian plans to expand their influence in the region.\n3. Greece did not receive any military or financial support from Russia, leading to its limited involvement in the war.\n4. Russia's intervention in the Principalities was a risk, as they were concerned about the consequences for their diplomatic relations with the Ottoman Empire.\n5. Greece did invade Thessaly and Epirus in the hope of taking over Ottoman lands, which was prevented by the British and French occupying Piraeus.\n6. Greece's incitement of the Epirus Revolt was not successful, and uprisings in Crete were also easily crushed by the Ottoman army.\n7. Greece was not invited to the peace conference and did not gain any significant advantages from the conflict.\n8. The fall in the popularity of the Greek King was attributed to his perceived failure to take advantage of the situation during the war.\nYou are an AI assistant that helps people find information. User will you give you a question. Your task is to answer as faithfully as you can. While answering think step-by-step and justify your answer.",
+    "stats": {
+     "baseline_mean": 0.2,
+     "baseline_std": 0.0,
+     "adapter_mean": 0.13333333333333333,
+     "adapter_std": 0.11547005383792516,
+     "gain_mean": -0.06666666666666667
+    }
+   },
+   {
+    "text": "1. Greece initially saw an opportunity to expand North and South into Ottoman areas with large Greek Christian majorities, due to Russia attacking the Ottoman Empire.\n2. Despite this opportunity, Greece did not declare war, coordinate with Russia, or seek outside military or financial support, effectively limiting its ability to participate in the war.\n3. As a result, when Russian forces invaded the Principalities, the Ottoman forces were tied down and Greece was prevented from further Greek moves.\n4. In an attempt to increase their influence in the war, Greece received external support from Russia.\n5. However, the Russian government decided it was too dangerous to help Greece expand its holdings, causing Greece to be a peripheral role in the Crimean War.\n6. The British and French occupied Greece's main port at Piraeus, preventing further Greek moves and effectively neutralizing the Greek army.\n7. Greeks incited an unsuccessful revolt in Epirus and a failed uprising in Crete, further demonstrating their lack of coordination and support during the war.\n8. The success of the Ottoman forces crushed the Greek insurrections, preventing Greece from achieving the desired gains from the war.\n9. Greece was not invited to the peace conference and did not gain any new territories or advantages.\n10. The frustrated Greek leadership blamed King Otto for failing to take advantage of the Russian victory, ultimately leading to his abdication.\nYou are an AI assistant. User will you give you a task. Your goal is to complete the task as faithfully as you can. While performing the task think step-by-step and justify your steps.",
+    "stats": {
+     "baseline_mean": 0.2,
+     "baseline_std": 0.0,
+     "adapter_mean": 0.06666666666666667,
+     "adapter_std": 0.11547005383792516,
+     "gain_mean": -0.13333333333333333
+    }
+   }
+  ],
+  "questions": [
+   {
+    "question": "When Russia attacked the Ottoman Empire who glimpsed an opportunity to advance North and South?",
+    "answer": "King Otto of Greece",
+    "baseline_answer": "The Crimean War was a conflict between the Russian Empire and an alliance of the Ottoman Empire, Kingdom of Sardinia, Kingdom of Piedmont-Sardinia, Kingdom of the Two Sicilies, Kingdom of Naples, Kingdom of the Two Crowns, Kingdom of the Two Sicilies, Kingdom of Naples, Kingdom of",
+    "adapter_answer": "Russia seized the opportunity to expand its influence in the Ottoman Empire and to take over Ottoman territory. The Ottoman Empire was in a state of disarray after the war, and Russia took advantage of this situation to seize Ottoman holdings in the Balkans. Russia also seized Ottoman territory in the Caucasus Mountains, where the Russians invaded",
+    "baseline_correct": false,
+    "adapter_correct": false
+   },
+   {
+    "question": "When the Ottoman forces were busy, who did Greece invade?",
+    "answer": "Thessaly and Epirus",
+    "baseline_answer": "The Crimean War",
+    "adapter_answer": "Greece invaded Crete in 1867. Crete was an Ottoman province, but Crete was also Crete's own Ottoman governor, who was appointed by Crete's own Crete's own Crete's own Crete's own Crete's own Crete's own Crete's own Cre",
+    "baseline_correct": false,
+    "adapter_correct": false
+   },
+   {
+    "question": "From April 1854 to February 1857, what port did the British and French lock down?",
+    "answer": "Greek port at Piraeus",
+    "baseline_answer": "The British and French locked down the port of Sevastopol during the Crimean War.",
+    "adapter_answer": "The British and French occupied the Crimean peninsula as part of the Ottoman Empire.",
+    "baseline_correct": false,
+    "adapter_correct": false
+   },
+   {
+    "question": "In what year did the Epirus Revolt take place?",
+    "answer": "1854",
+    "baseline_answer": "1821",
+    "adapter_answer": "The Epirus Revolt was a rebellion against Ottoman rule in Epirus, a region in southern Greece that was part of the Ottoman Empire from 1821 to 1912. It was a rebellion that was supported by the British and French, who sent military aid to the rebels. The",
+    "baseline_correct": false,
+    "adapter_correct": false
+   },
+   {
+    "question": "Who stirred up the Epirus Revolt of 1854?",
+    "answer": "Greeks",
+    "baseline_answer": "The Epirus Revolt of 1854 was stirred up by the Greek revolutionary leader, Alexandros Zaimis.",
+    "adapter_answer": "The revolt was a rebellion of Greek soldiers who were stationed in the Ottoman army. The Greeks had been fighting for independence since the 1820s, but the Ottoman government had not allowed them to do so. The Greeks had a strong military presence in the Epirus region, which was part of the Ottoman",
+    "baseline_correct": true,
+    "adapter_correct": true
+   },
+   {
+    "question": "When Russia attacked the Ottoman Empire who glimpsed an opportunity to advance North and South?",
+    "answer": "King Otto of Greece",
+    "baseline_answer": "The Crimean War was a conflict between the Russian Empire and an alliance of the Ottoman Empire, Kingdom of Sardinia, Kingdom of Piedmont-Sardinia, Kingdom of the Two Sicilies, Kingdom of Naples, Kingdom of the Two Crowns, Kingdom of the Two Sicilies, Kingdom of Naples, Kingdom of",
+    "adapter_answer": "The Ottoman army was weak and disorganized. The Ottoman government appointed a Russian general, Prince George of Greece, as the new governor of Crete.",
+    "baseline_correct": false,
+    "adapter_correct": false
+   }
+  ],
+  "picked": 1
+ }
+}

@@ -1,0 +1,316 @@
+[
+ {
+  "step": "req1",
+  "text": "You are a helpful tutor . Explain KV cache",
+  "n_tokens": 9,
+  "prefix_hit": 0,
+  "new_kv_slots_computed": 9,
+  "size": {
+   "evictable_size": 9,
+   "protected_size": 0
+  },
+  "tree": [
+   {
+    "tokens": [
+     "You",
+     "are",
+     "a",
+     "helpful",
+     "tutor",
+     ".",
+     "Explain",
+     "KV",
+     "cache"
+    ],
+    "slots": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8
+    ],
+    "ref": 0,
+    "children": []
+   }
+  ]
+ },
+ {
+  "step": "req2",
+  "text": "You are a helpful tutor . Explain radix tree",
+  "n_tokens": 9,
+  "prefix_hit": 7,
+  "new_kv_slots_computed": 2,
+  "size": {
+   "evictable_size": 11,
+   "protected_size": 0
+  },
+  "tree": [
+   {
+    "tokens": [
+     "You",
+     "are",
+     "a",
+     "helpful",
+     "tutor",
+     ".",
+     "Explain"
+    ],
+    "slots": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "ref": 0,
+    "children": [
+     {
+      "tokens": [
+       "KV",
+       "cache"
+      ],
+      "slots": [
+       7,
+       8
+      ],
+      "ref": 0,
+      "children": []
+     },
+     {
+      "tokens": [
+       "radix",
+       "tree"
+      ],
+      "slots": [
+       9,
+       10
+      ],
+      "ref": 0,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "step": "req3",
+  "text": "You are a helpful tutor . Explain KV cache eviction",
+  "n_tokens": 10,
+  "prefix_hit": 9,
+  "new_kv_slots_computed": 1,
+  "size": {
+   "evictable_size": 12,
+   "protected_size": 0
+  },
+  "tree": [
+   {
+    "tokens": [
+     "You",
+     "are",
+     "a",
+     "helpful",
+     "tutor",
+     ".",
+     "Explain"
+    ],
+    "slots": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "ref": 0,
+    "children": [
+     {
+      "tokens": [
+       "KV",
+       "cache"
+      ],
+      "slots": [
+       7,
+       8
+      ],
+      "ref": 0,
+      "children": [
+       {
+        "tokens": [
+         "eviction"
+        ],
+        "slots": [
+         11
+        ],
+        "ref": 0,
+        "children": []
+       }
+      ]
+     },
+     {
+      "tokens": [
+       "radix",
+       "tree"
+      ],
+      "slots": [
+       9,
+       10
+      ],
+      "ref": 0,
+      "children": []
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "step": "req4",
+  "text": "Hi there",
+  "n_tokens": 2,
+  "prefix_hit": 0,
+  "new_kv_slots_computed": 2,
+  "size": {
+   "evictable_size": 14,
+   "protected_size": 0
+  },
+  "tree": [
+   {
+    "tokens": [
+     "You",
+     "are",
+     "a",
+     "helpful",
+     "tutor",
+     ".",
+     "Explain"
+    ],
+    "slots": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "ref": 0,
+    "children": [
+     {
+      "tokens": [
+       "KV",
+       "cache"
+      ],
+      "slots": [
+       7,
+       8
+      ],
+      "ref": 0,
+      "children": [
+       {
+        "tokens": [
+         "eviction"
+        ],
+        "slots": [
+         11
+        ],
+        "ref": 0,
+        "children": []
+       }
+      ]
+     },
+     {
+      "tokens": [
+       "radix",
+       "tree"
+      ],
+      "slots": [
+       9,
+       10
+      ],
+      "ref": 0,
+      "children": []
+     }
+    ]
+   },
+   {
+    "tokens": [
+     "Hi",
+     "there"
+    ],
+    "slots": [
+     12,
+     13
+    ],
+    "ref": 0,
+    "children": []
+   }
+  ]
+ },
+ {
+  "step": "evict(3)",
+  "evicted_slots": [
+   9,
+   10,
+   11
+  ],
+  "size": {
+   "evictable_size": 11,
+   "protected_size": 0
+  },
+  "tree": [
+   {
+    "tokens": [
+     "You",
+     "are",
+     "a",
+     "helpful",
+     "tutor",
+     ".",
+     "Explain"
+    ],
+    "slots": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "ref": 0,
+    "children": [
+     {
+      "tokens": [
+       "KV",
+       "cache"
+      ],
+      "slots": [
+       7,
+       8
+      ],
+      "ref": 0,
+      "children": []
+     }
+    ]
+   },
+   {
+    "tokens": [
+     "Hi",
+     "there"
+    ],
+    "slots": [
+     12,
+     13
+    ],
+    "ref": 0,
+    "children": []
+   }
+  ]
+ }
+]

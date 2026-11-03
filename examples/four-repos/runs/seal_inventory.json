@@ -1,0 +1,1128 @@
+[
+{
+"path": "README.md",
+"lines": 83,
+"defs": []
+},
+{
+"path": "few-shot/BC-self-edit.py",
+"lines": 197,
+"defs": [
+[
+"parse_args",
+13
+],
+[
+"create_dataset",
+82
+]
+]
+},
+{
+"path": "few-shot/README.md",
+"lines": 136,
+"defs": []
+},
+{
+"path": "few-shot/eval-self-edits-baseline.py",
+"lines": 378,
+"defs": []
+},
+{
+"path": "few-shot/eval-self-edits.py",
+"lines": 381,
+"defs": []
+},
+{
+"path": "few-shot/launch.sh",
+"lines": 24,
+"defs": []
+},
+{
+"path": "few-shot/predict_baseline.py",
+"lines": 357,
+"defs": []
+},
+{
+"path": "few-shot/predict_custom.py",
+"lines": 371,
+"defs": []
+},
+{
+"path": "few-shot/self-edit.py",
+"lines": 615,
+"defs": [
+[
+"mode_array",
+76
+],
+[
+"read_tasks_from_folder",
+85
+],
+[
+"read_tasks_from_single_file",
+98
+],
+[
+"read_tasks_from_file",
+123
+],
+[
+"NumpyEncoder",
+130
+],
+[
+"get_augmenters",
+144
+],
+[
+"_tokenize_and_process",
+222
+],
+[
+"format_and_filter",
+257
+],
+[
+"get_test_time_train_data",
+268
+],
+[
+"get_formatted_data",
+317
+],
+[
+"process_task",
+341
+],
+[
+"get_prompt",
+368
+],
+[
+"main",
+393
+]
+]
+},
+{
+"path": "few-shot/ttt.py",
+"lines": 462,
+"defs": [
+[
+"mode_array",
+59
+],
+[
+"read_tasks_from_folder",
+68
+],
+[
+"read_tasks_from_single_file",
+81
+],
+[
+"read_tasks_from_file",
+106
+],
+[
+"NumpyEncoder",
+113
+],
+[
+"get_augmenters",
+127
+],
+[
+"_tokenize_and_process",
+205
+],
+[
+"format_and_filter",
+240
+],
+[
+"get_test_time_train_data",
+251
+],
+[
+"get_formatted_data",
+300
+],
+[
+"process_task",
+324
+],
+[
+"main",
+352
+]
+]
+},
+{
+"path": "few-shot/arclib/arc.py",
+"lines": 290,
+"defs": [
+[
+"to_tuple",
+22
+],
+[
+"to_list",
+26
+],
+[
+"Example",
+31
+],
+[
+"Task",
+87
+],
+[
+"TaskWithDescription",
+183
+],
+[
+"read_tasks_from_folder",
+187
+],
+[
+"read_tasks_from_single_file",
+202
+],
+[
+"read_tasks_from_file",
+229
+],
+[
+"make_submission",
+239
+]
+]
+},
+{
+"path": "few-shot/arclib/augmenters.py",
+"lines": 985,
+"defs": [
+[
+"Augmenter",
+37
+],
+[
+"Rotate",
+88
+],
+[
+"PermuteColors",
+109
+],
+[
+"PermuteColorswithMap",
+185
+],
+[
+"PermuteColorsRespectKeyColors",
+206
+],
+[
+"PermuteColorsStatic",
+302
+],
+[
+"Flip",
+318
+],
+[
+"Reflect",
+336
+],
+[
+"Repeat",
+368
+],
+[
+"Transpose",
+389
+],
+[
+"IncreaseResolution",
+398
+],
+[
+"IncreaseHeight",
+413
+],
+[
+"IncreaseWidth",
+427
+],
+[
+"DropoutInput",
+441
+],
+[
+"DropoutOutput",
+489
+],
+[
+"RandomTranslateXY",
+532
+],
+[
+"RandomTranslateX",
+551
+],
+[
+"RandomTranslateY",
+567
+],
+[
+"find_connected_components",
+583
+],
+[
+"RandomObjectRotate",
+615
+],
+[
+"PermuteExamples",
+663
+],
+[
+"RandomObjectTranslateXY",
+673
+],
+[
+"Chain",
+715
+],
+[
+"Concat",
+746
+],
+[
+"IdentityAugmenter",
+762
+],
+[
+"inverse",
+770
+],
+[
+"apply_a_random_augmentation",
+896
+]
+]
+},
+{
+"path": "few-shot/arclib/eval.py",
+"lines": 272,
+"defs": [
+[
+"plot_the_mistake",
+22
+],
+[
+"accuracy",
+54
+],
+[
+"hamming_distance",
+60
+],
+[
+"evaluate",
+74
+],
+[
+"compare",
+151
+]
+]
+},
+{
+"path": "few-shot/arclib/messagers.py",
+"lines": 1244,
+"defs": [
+[
+"display_messages",
+31
+],
+[
+"MessageRepresenter",
+143
+],
+[
+"GPTTextMessagerepresenter",
+157
+],
+[
+"GPTTextMessageRepresenterV2",
+198
+],
+[
+"GPTTextMessageRepresenterV2CoT",
+286
+],
+[
+"DataToCodeTextrepresenter",
+356
+],
+[
+"GPTTextMessageRepresenterFewShot",
+392
+],
+[
+"GPTTextImageMessagerepresenter",
+446
+],
+[
+"GPTTextImageMessageRepresenterFewShot",
+548
+],
+[
+"TextMessageRepresenterFewShot",
+740
+],
+[
+"GPTImageMessageRepresenterFewShot",
+835
+],
+[
+"GPTTextImageCodeMessageRepresenterFewShot",
+953
+],
+[
+"GPTCodeDebuggerMessager",
+1099
+],
+[
+"GPTTextMessageRepresenterForBarc",
+1144
+]
+]
+},
+{
+"path": "few-shot/arclib/representers.py",
+"lines": 982,
+"defs": [
+[
+"parse_numpy_from_str",
+33
+],
+[
+"GridRepresenter",
+72
+],
+[
+"ExampleRepresenter",
+85
+],
+[
+"TaskRepresenter",
+103
+],
+[
+"DelimitedGridRepresenter",
+122
+],
+[
+"PythonListGridRepresenter",
+147
+],
+[
+"WordGridRepresenter",
+161
+],
+[
+"ConnectedComponentRepresenter",
+199
+],
+[
+"CompositeRepresenter",
+417
+],
+[
+"ImageGridRepresenter",
+450
+],
+[
+"ConnectedComponentRepresenterV2",
+511
+],
+[
+"TextExampleRepresenter",
+587
+],
+[
+"ImageExampleRepresenter",
+645
+],
+[
+"DiffExampleRepresenter",
+705
+],
+[
+"TextTaskRepresenter",
+776
+],
+[
+"ImageTaskRepresenter",
+834
+]
+]
+},
+{
+"path": "few-shot/arclib/update_model.py",
+"lines": 257,
+"defs": [
+[
+"TTT",
+44
+]
+]
+},
+{
+"path": "few-shot/arclib/voting.py",
+"lines": 127,
+"defs": [
+[
+"row_base_majority_voting",
+13
+],
+[
+"get_all_type_of_votingsv2",
+37
+],
+[
+"vote",
+72
+]
+]
+},
+{
+"path": "few-shot/inference/engine.py",
+"lines": 72,
+"defs": [
+[
+"get_sampling_params",
+8
+],
+[
+"initialize_engine",
+26
+],
+[
+"process_requests",
+52
+]
+]
+},
+{
+"path": "few-shot/inference/engine_hf.py",
+"lines": 71,
+"defs": [
+[
+"get_sampling_params",
+9
+],
+[
+"initialize_engine",
+27
+],
+[
+"process_requests",
+45
+]
+]
+},
+{
+"path": "few-shot/inference/engine_no_lora.py",
+"lines": 70,
+"defs": [
+[
+"get_sampling_params",
+8
+],
+[
+"initialize_engine",
+26
+],
+[
+"process_requests",
+50
+]
+]
+},
+{
+"path": "few-shot/inference/engine_no_lora_vllm.py",
+"lines": 62,
+"defs": [
+[
+"get_sampling_params",
+8
+],
+[
+"initialize_engine",
+26
+],
+[
+"process_requests",
+46
+]
+]
+},
+{
+"path": "few-shot/inference/engine_vllm.py",
+"lines": 63,
+"defs": [
+[
+"get_sampling_params",
+8
+],
+[
+"initialize_engine",
+26
+],
+[
+"process_requests",
+46
+]
+]
+},
+{
+"path": "few-shot/inference/preprocess.py",
+"lines": 182,
+"defs": [
+[
+"get_leave_n_test_task",
+16
+],
+[
+"get_augmented_test_tasks",
+71
+],
+[
+"format_and_filter",
+80
+],
+[
+"get_formatted_test_tasks",
+118
+],
+[
+"get_preprocessed_tasks_single",
+131
+],
+[
+"get_preprocessed_tasks",
+155
+]
+]
+},
+{
+"path": "few-shot/utils/lm_api.py",
+"lines": 138,
+"defs": [
+[
+"setup_lm_api",
+66
+],
+[
+"batch",
+108
+],
+[
+"run_agent",
+124
+]
+]
+},
+{
+"path": "few-shot/utils/np_cache.py",
+"lines": 170,
+"defs": [
+[
+"np_lru_cache",
+17
+],
+[
+"_hasher",
+139
+],
+[
+"_make_hash_key",
+143
+],
+[
+"_HashedArrSeq",
+157
+]
+]
+},
+{
+"path": "few-shot/utils/prompts.py",
+"lines": 44,
+"defs": []
+},
+{
+"path": "general-knowledge/README.md",
+"lines": 49,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/CPT.sh",
+"lines": 63,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/CPT_GA.sh",
+"lines": 52,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/CPT_fullFT.sh",
+"lines": 69,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/GA_server.sh",
+"lines": 45,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/TTT_server.sh",
+"lines": 71,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/continual_self_edits.sh",
+"lines": 74,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/make_squad_data.sh",
+"lines": 61,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/make_squad_data_entigraph.sh",
+"lines": 58,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/make_squad_data_openai.sh",
+"lines": 23,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/query_server.sh",
+"lines": 74,
+"defs": []
+},
+{
+"path": "general-knowledge/scripts/train_SFT.sh",
+"lines": 51,
+"defs": []
+},
+{
+"path": "general-knowledge/src/utils.py",
+"lines": 313,
+"defs": [
+[
+"set_vllm_api_url",
+63
+],
+[
+"_api",
+70
+],
+[
+"load_adapter",
+89
+],
+[
+"unload_adapter",
+93
+],
+[
+"generate",
+97
+],
+[
+"format_answer_prompts",
+106
+],
+[
+"format_grade_prompts",
+114
+],
+[
+"extract_final_answer",
+136
+],
+[
+"_client",
+146
+],
+[
+"grade_with_gpt4",
+153
+],
+[
+"parse_yes_no",
+182
+],
+[
+"_split_segments",
+188
+],
+[
+"build_train_sequences",
+193
+],
+[
+"build_proxy_prompt",
+264
+],
+[
+"_to_int_clamped",
+267
+],
+[
+"parse_proxy_scores",
+274
+],
+[
+"score_proxy_with_gpt4",
+295
+]
+]
+},
+{
+"path": "general-knowledge/src/EM/build_SFT_dataset.py",
+"lines": 76,
+"defs": [
+[
+"_top_k",
+20
+],
+[
+"_parse_args",
+33
+],
+[
+"main",
+47
+]
+]
+},
+{
+"path": "general-knowledge/src/EM/train_SFT.py",
+"lines": 94,
+"defs": [
+[
+"parse_args",
+17
+],
+[
+"longest_seq_len",
+33
+],
+[
+"main",
+39
+]
+]
+},
+{
+"path": "general-knowledge/src/continual/average_results.py",
+"lines": 129,
+"defs": [
+[
+"load_matrices_and_metadata",
+15
+],
+[
+"compute_average_matrix",
+58
+],
+[
+"compute_pooled_std",
+65
+],
+[
+"save_aggregated_results",
+110
+],
+[
+"main",
+120
+]
+]
+},
+{
+"path": "general-knowledge/src/continual/continual_self_edits.py",
+"lines": 453,
+"defs": [
+[
+"_banner",
+62
+],
+[
+"_spawn_vllm",
+67
+],
+[
+"_spawn_inner_server",
+108
+],
+[
+"_connect_zmq",
+130
+],
+[
+"_send_round",
+137
+],
+[
+"_merge_lora",
+158
+],
+[
+"run_one_sequence",
+175
+],
+[
+"parse_args",
+363
+],
+[
+"main",
+400
+]
+]
+},
+{
+"path": "general-knowledge/src/data_generation/make_squad_data.py",
+"lines": 180,
+"defs": [
+[
+"make_prompt",
+70
+],
+[
+"generate_bulk",
+77
+],
+[
+"main",
+112
+]
+]
+},
+{
+"path": "general-knowledge/src/data_generation/make_squad_data_entigraph.py",
+"lines": 280,
+"defs": [
+[
+"_generate_bulk",
+77
+],
+[
+"_entities_prompt",
+112
+],
+[
+"_pair_prompt",
+115
+],
+[
+"_triple_prompt",
+121
+],
+[
+"_parse_entities",
+129
+],
+[
+"main",
+156
+]
+]
+},
+{
+"path": "general-knowledge/src/data_generation/make_squad_data_openai.py",
+"lines": 166,
+"defs": [
+[
+"client",
+62
+],
+[
+"make_prompt",
+69
+],
+[
+"generate_bulk_openai",
+75
+],
+[
+"main",
+103
+]
+]
+},
+{
+"path": "general-knowledge/src/inner/GA_server.py",
+"lines": 366,
+"defs": [
+[
+"_chat_generate_baseline",
+67
+],
+[
+"_grade",
+95
+],
+[
+"_answers_with_ga",
+111
+],
+[
+"main",
+142
+]
+]
+},
+{
+"path": "general-knowledge/src/inner/TTT_server.py",
+"lines": 380,
+"defs": [
+[
+"accuracy_and_texts",
+67
+],
+[
+"main",
+107
+]
+]
+},
+{
+"path": "general-knowledge/src/query/CPT.py",
+"lines": 239,
+"defs": [
+[
+"parse_args",
+27
+],
+[
+"send_round_trip",
+57
+],
+[
+"main",
+84
+]
+]
+},
+{
+"path": "general-knowledge/src/query/CPT_GA.py",
+"lines": 384,
+"defs": [
+[
+"_apply_stops",
+73
+],
+[
+"_baseline_answers",
+82
+],
+[
+"_ga_answers",
+110
+],
+[
+"_grade_accuracy",
+139
+],
+[
+"parse_args",
+156
+],
+[
+"main",
+193
+]
+]
+},
+{
+"path": "general-knowledge/src/query/CPT_fullFT.py",
+"lines": 353,
+"defs": [
+[
+"_grade_accuracy",
+41
+],
+[
+"_eval_with_vllm_engine",
+51
+],
+[
+"parse_args",
+75
+],
+[
+"main",
+119
+]
+]
+},
+{
+"path": "general-knowledge/src/query/query_server.py",
+"lines": 353,
+"defs": [
+[
+"parse_args",
+38
+],
+[
+"send_round_trip",
+65
+],
+[
+"evaluate_completion",
+128
+],
+[
+"send_shutdown",
+198
+],
+[
+"main",
+203
+]
+]
+},
+{
+"path": "general-knowledge/results/",
+"lines": 0,
+"defs": [],
+"files": 74
+},
+{
+"path": "general-knowledge/data/",
+"lines": 0,
+"defs": [],
+"files": 114
+},
+{
+"path": "few-shot/data/",
+"lines": 0,
+"defs": [],
+"files": 10
+}
+]
