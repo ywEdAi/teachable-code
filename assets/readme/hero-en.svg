@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="370" viewBox="0 0 1200 370" role="img" aria-labelledby="title desc">
+  <title id="title">Teachable Code</title>
+  <desc id="desc">An agent skill for interactive 2D and 3D lessons. The mini-sglang specimen shows seven reused tokens and two newly computed tokens.</desc>
+  <defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 7 3.5 0 7" fill="none" stroke="#a0a6c8" stroke-width="1.4"/></marker></defs>
+  <rect width="1200" height="370" rx="20" fill="#0d1020"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,sans-serif">
+    <text x="52" y="49" fill="#a0a6c8" font-size="19" font-weight="600" letter-spacing="2">AGENT SKILL · 2D + 3D</text>
+    <text x="49" y="137" fill="#eceefa" font-size="78" font-weight="750" letter-spacing="-3">Teachable</text>
+    <text x="49" y="227" fill="#9193ff" font-size="98" font-weight="750" letter-spacing="-4">Code</text>
+    <text x="53" y="289" fill="#eceefa" font-size="31" font-weight="600">Follow the data. See the system.</text>
+    <text x="54" y="327" fill="#a0a6c8" font-size="23">Interactive lessons from real codebases</text>
+    <g id="prefix-cache-specimen">
+      <text x="694" y="49" fill="#a0a6c8" font-size="18" font-weight="600" letter-spacing="1">MINI-SGLANG · PREFIX CACHE</text>
+      <rect x="690" y="75" width="458" height="231" rx="16" fill="#171a31"/>
+      <rect x="716" y="99" width="165" height="45" rx="10" fill="#222743" stroke="#41486a"/>
+      <text x="798" y="129" text-anchor="middle" fill="#eceefa" font-size="23" font-weight="600">Request</text>
+      <path d="M884 121 H937" fill="none" stroke="#a0a6c8" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="946" y="99" width="176" height="45" rx="10" fill="#282749" stroke="#9193ff"/>
+      <text x="1034" y="129" text-anchor="middle" fill="#d2d3ff" font-size="23" font-weight="600">Prefix tree</text>
+      <path d="M1034 145 V176 H731 V207" fill="none" stroke="#a0a6c8" stroke-width="2" marker-end="url(#arrow)"/>
+      <text x="755" y="200" fill="#a0a6c8" font-size="21" font-weight="600">GPU / KV MEMORY</text>
+      <rect x="716" y="218" width="36" height="34" rx="6" fill="#3bd3c1" fill-opacity="0.82"/><rect x="762" y="218" width="36" height="34" rx="6" fill="#3bd3c1" fill-opacity="0.82"/><rect x="808" y="218" width="36" height="34" rx="6" fill="#3bd3c1" fill-opacity="0.82"/><rect x="854" y="218" width="36" height="34" rx="6" fill="#3bd3c1" fill-opacity="0.82"/><rect x="900" y="218" width="36" height="34" rx="6" fill="#3bd3c1" fill-opacity="0.82"/><rect x="946" y="218" width="36" height="34" rx="6" fill="#3bd3c1" fill-opacity="0.82"/><rect x="992" y="218" width="36" height="34" rx="6" fill="#3bd3c1" fill-opacity="0.82"/><rect x="1038" y="218" width="36" height="34" rx="6" fill="#ff9070" fill-opacity="0.95"/><rect x="1084" y="218" width="36" height="34" rx="6" fill="#ff9070" fill-opacity="0.95"/>
+      <path d="M716 262 V270 H1028 V262" fill="none" stroke="#3bd3c1" stroke-width="1.7"/>
+      <path d="M1038 262 V270 H1120 V262" fill="none" stroke="#ff9070" stroke-width="1.7"/>
+      <text x="872" y="293" text-anchor="middle" fill="#3bd3c1" font-size="22" font-weight="600">7 reused</text>
+      <text x="1080" y="293" text-anchor="middle" fill="#ff9070" font-size="22" font-weight="600">2 new</text>
+      <text x="694" y="337" fill="#a0a6c8" font-size="18">Cache-rule replay · 9-token example</text>
+    </g>
+  </g>
+</svg>

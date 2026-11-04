@@ -1,28 +1,29 @@
-# Teachable Code
+<p align="center">
+  <img src="assets/readme/hero-en.svg" width="100%" alt="Teachable Code. Interactive lessons from real codebases, illustrated by seven reused tokens and two newly computed tokens in mini-sglang.">
+</p>
 
-**English** · [简体中文](README.zh-CN.md)
+<p align="center"><strong>English</strong> · <a href="README.zh-CN.md">简体中文</a></p>
+<p align="center"><a href="https://ywedai.github.io/teachable-code/"><strong>Open live demo ↗</strong></a> · <a href="https://ywedai.github.io/teachable-code/zh-CN/">中文演示 ↗</a> · <a href="#teach-me-a-repository">Use the skill</a></p>
 
-### Follow one piece of data. See how the code works.
+**Teachable Code** is an agent skill that turns a codebase into an interactive lesson. Explore a persistent system map, follow the current step, and inspect the source files and data behind it. Use **3D for tensors and memory**, **2D for applications and tool calls**.
 
-An agent skill that turns a codebase into an interactive lesson. Explore a persistent system map, follow the current step, and inspect the source files and data behind it. Use **3D for tensors and memory**, **2D for applications and tool calls**.
+[![mini-SGLang lesson showing a persistent 3D system map, source folder, step explanation and input/output panels](assets/readme/mini-sglang-en.png)](https://ywedai.github.io/teachable-code/lessons/mini-sglang.html)
 
-![mini-SGLang lesson showing a persistent 3D system map, source folder, step explanation and input/output panels](assets/readme/mini-sglang-en.png)
+*mini-SGLang example: reuse 7 tokens, compute 2 new ones. The system map, source files, current step and input/output stay visible together.*
 
-*One screen holds the system, the current step, the project folder and the data. Zoom, pan, or click a component to inspect it.*
-
-[Explore the five examples](#five-worked-examples) · [Run the demo](#open-the-demo-in-your-browser) · [Use the skill](#teach-me-a-repository) · [中文示例](docs/zh-CN/index.html)
+[Explore the five examples](#five-worked-examples) · [Run the demo](#open-the-demo-in-your-browser) · [Use the skill](#teach-me-a-repository) · [中文示例](https://ywedai.github.io/teachable-code/zh-CN/)
 
 ## Five worked examples
 
-Each lesson opens with a concrete question. Every example has an English and Chinese page. The links below point to the static HTML files; serve `docs/` locally to use them in a browser.
+Choose a question and open the lesson. Every demo runs in your browser, in English or Chinese.
 
-| Repository | Follow the process | View | Lesson files |
+| Repository | Follow the process | View | Open lesson |
 | --- | --- | --- | --- |
-| **mini-SGLang** | Request → prefix tree → KV memory → attention. Why does the next request need less work? | 3D · 14 steps | [EN](docs/lessons/mini-sglang.html) · [中文](docs/zh-CN/lessons/mini-sglang.html) |
-| **nanoGPT** | Characters → vectors → attention → sampling → gradients → updated weights. | 3D · 15 steps | [EN](docs/lessons/nanogpt.html) · [中文](docs/zh-CN/lessons/nanogpt.html) |
-| **SWE-agent** | Issue → context → command → sandbox → feedback → patch. | 3D · 13 steps | [EN](docs/lessons/swe-agent.html) · [中文](docs/zh-CN/lessons/swe-agent.html) |
-| **DeepTutor** | Question → instructions → textbook retrieval → tool loop → answer. | 2D · 13 steps | [EN](docs/lessons/deeptutor.html) · [中文](docs/zh-CN/lessons/deeptutor.html) |
-| **AI chatbot** | Send → request checks → context → weather tool → streamed answer. | 2D · 11 steps | [EN](docs/lessons/ai-chatbot.html) · [中文](docs/zh-CN/lessons/ai-chatbot.html) |
+| **mini-SGLang** | Request → prefix tree → KV memory → attention. Why does the next request need less work? | 3D · 14 steps | [EN](https://ywedai.github.io/teachable-code/lessons/mini-sglang.html) · [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/mini-sglang.html) |
+| **nanoGPT** | Characters → vectors → attention → sampling → gradients → updated weights. | 3D · 15 steps | [EN](https://ywedai.github.io/teachable-code/lessons/nanogpt.html) · [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/nanogpt.html) |
+| **SWE-agent** | Issue → context → command → sandbox → feedback → patch. | 3D · 13 steps | [EN](https://ywedai.github.io/teachable-code/lessons/swe-agent.html) · [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/swe-agent.html) |
+| **DeepTutor** | Question → instructions → textbook retrieval → tool loop → answer. | 2D · 13 steps | [EN](https://ywedai.github.io/teachable-code/lessons/deeptutor.html) · [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/deeptutor.html) |
+| **AI chatbot** | Send → request checks → context → weather tool → streamed answer. | 2D · 11 steps | [EN](https://ywedai.github.io/teachable-code/lessons/ai-chatbot.html) · [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/ai-chatbot.html) |
 
 <details>
 <summary>See the 2D view in DeepTutor</summary>
@@ -33,7 +34,10 @@ Each lesson opens with a concrete question. Every example has an English and Chi
 
 ## Open the demo in your browser
 
-No model key or GPU is needed to explore the included lessons.
+Open the **[English gallery](https://ywedai.github.io/teachable-code/)** or **[Chinese gallery](https://ywedai.github.io/teachable-code/zh-CN/)**. No installation, model key or training GPU is needed. Language switching keeps your current step.
+
+<details>
+<summary>Run the same demo locally</summary>
 
 ```bash
 git clone https://github.com/ywEdAi/teachable-code.git
@@ -41,9 +45,11 @@ cd teachable-code
 python3 -m http.server 8000 --directory docs
 ```
 
-Open [the English gallery](http://localhost:8000/) or [the Chinese gallery](http://localhost:8000/zh-CN/). Switch languages inside a lesson without losing your step. Fonts and the 3D runtime load from public CDNs, so internet access is required.
+Open [localhost:8000](http://localhost:8000/) or [localhost:8000/zh-CN/](http://localhost:8000/zh-CN/).
 
-The repository contains a static site ready for GitHub Pages. These instructions serve it locally; a hosted Pages deployment is separate.
+</details>
+
+Fonts and the 3D runtime load from public CDNs. Both the online and local demos need internet access.
 
 ## Teach me a repository
 

@@ -1,28 +1,29 @@
-# Teachable Code
+<p align="center">
+  <img src="assets/readme/hero-zh.svg" width="100%" alt="Teachable Code，把代码变成可交互的课程。以 mini-sglang 的七个 token 复用、两个新增为例，跟着数据看懂系统。">
+</p>
 
-[English](README.md) · **简体中文**
+<p align="center"><a href="README.md">English</a> · <strong>简体中文</strong></p>
+<p align="center"><a href="https://ywedai.github.io/teachable-code/zh-CN/"><strong>在线体验中文版 ↗</strong></a> · <a href="https://ywedai.github.io/teachable-code/">English demo ↗</a> · <a href="#让-agent-带你读一个仓库">使用这个 skill</a></p>
 
-### 跟着一份数据，看懂代码如何运转。
+**Teachable Code** 是一个把代码仓库变成交互课程的 agent skill。在完整系统图中跟随当前步骤，点击查看背后的源文件与数据。**用 3D 表达张量和内存，用 2D 表达应用与工具调用。**
 
-一个把代码仓库变成交互课程的 agent skill。在完整系统图中跟随当前步骤，点击查看背后的源文件与数据。**用 3D 表达张量和内存，用 2D 表达应用与工具调用。**
+[![mini-SGLang 中文课程：完整的 3D 系统图、项目目录、步骤讲解，以及输入输出面板同屏展示](assets/readme/mini-sglang-zh.png)](https://ywedai.github.io/teachable-code/zh-CN/lessons/mini-sglang.html)
 
-![mini-SGLang 中文课程：完整的 3D 系统图、项目目录、步骤讲解，以及输入输出面板同屏展示](assets/readme/mini-sglang-zh.png)
+*mini-SGLang 示例：7 个 token 复用、2 个新增。系统全貌、源码目录、当前步骤与输入输出同屏呈现。*
 
-*系统全貌、当前步骤、项目目录与数据同屏呈现。缩放、拖动，点击部件即可查看详情。*
-
-[查看五个示例](#五个完整示例) · [在浏览器运行](#在浏览器打开示例) · [使用这个 skill](#让-agent-带你读一个仓库) · [英文示例](docs/index.html)
+[查看五个示例](#五个完整示例) · [在浏览器运行](#在浏览器打开示例) · [使用这个 skill](#让-agent-带你读一个仓库) · [英文示例](https://ywedai.github.io/teachable-code/)
 
 ## 五个完整示例
 
-每节课从一个具体问题出发，均提供英文和中文版本。下方链接指向静态 HTML 文件；用本地服务打开 `docs/` 后即可交互。
+选一个问题，直接在浏览器中打开课程。每个示例均提供中文和英文版本。
 
-| 仓库 | 跟随什么过程 | 视图 | 课程文件 |
+| 仓库 | 跟随什么过程 | 视图 | 打开课程 |
 | --- | --- | --- | --- |
-| **mini-SGLang** | 请求 → 前缀树 → KV 内存 → 注意力。为什么第二次请求可以少算一些？ | 3D · 14 步 | [中文](docs/zh-CN/lessons/mini-sglang.html) · [EN](docs/lessons/mini-sglang.html) |
-| **nanoGPT** | 字符 → 向量 → 注意力 → 采样 → 梯度 → 权重更新。 | 3D · 15 步 | [中文](docs/zh-CN/lessons/nanogpt.html) · [EN](docs/lessons/nanogpt.html) |
-| **SWE-agent** | 问题 → 上下文 → 命令 → 沙箱 → 反馈 → 补丁。 | 3D · 13 步 | [中文](docs/zh-CN/lessons/swe-agent.html) · [EN](docs/lessons/swe-agent.html) |
-| **DeepTutor** | 提问 → 指令 → 教材检索 → 工具循环 → 回答。 | 2D · 13 步 | [中文](docs/zh-CN/lessons/deeptutor.html) · [EN](docs/lessons/deeptutor.html) |
-| **AI chatbot** | 发送 → 请求检查 → 上下文 → 天气工具 → 流式回答。 | 2D · 11 步 | [中文](docs/zh-CN/lessons/ai-chatbot.html) · [EN](docs/lessons/ai-chatbot.html) |
+| **mini-SGLang** | 请求 → 前缀树 → KV 内存 → 注意力。为什么第二次请求可以少算一些？ | 3D · 14 步 | [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/mini-sglang.html) · [EN](https://ywedai.github.io/teachable-code/lessons/mini-sglang.html) |
+| **nanoGPT** | 字符 → 向量 → 注意力 → 采样 → 梯度 → 权重更新。 | 3D · 15 步 | [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/nanogpt.html) · [EN](https://ywedai.github.io/teachable-code/lessons/nanogpt.html) |
+| **SWE-agent** | 问题 → 上下文 → 命令 → 沙箱 → 反馈 → 补丁。 | 3D · 13 步 | [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/swe-agent.html) · [EN](https://ywedai.github.io/teachable-code/lessons/swe-agent.html) |
+| **DeepTutor** | 提问 → 指令 → 教材检索 → 工具循环 → 回答。 | 2D · 13 步 | [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/deeptutor.html) · [EN](https://ywedai.github.io/teachable-code/lessons/deeptutor.html) |
+| **AI chatbot** | 发送 → 请求检查 → 上下文 → 天气工具 → 流式回答。 | 2D · 11 步 | [中文](https://ywedai.github.io/teachable-code/zh-CN/lessons/ai-chatbot.html) · [EN](https://ywedai.github.io/teachable-code/lessons/ai-chatbot.html) |
 
 <details>
 <summary>看看 DeepTutor 的 2D 视图</summary>
@@ -33,7 +34,10 @@
 
 ## 在浏览器打开示例
 
-浏览已有课程不需要模型密钥或 GPU。
+直接打开 **[中文画廊](https://ywedai.github.io/teachable-code/zh-CN/)** 或 **[英文画廊](https://ywedai.github.io/teachable-code/)**。无需安装，也不需要模型密钥或训练用 GPU。切换语言时会保留当前步骤。
+
+<details>
+<summary>也可以在本地运行同一套示例</summary>
 
 ```bash
 git clone https://github.com/ywEdAi/teachable-code.git
@@ -41,9 +45,11 @@ cd teachable-code
 python3 -m http.server 8000 --directory docs
 ```
 
-打开[中文画廊](http://localhost:8000/zh-CN/)或[英文画廊](http://localhost:8000/)。课程内切换语言会保留当前步骤。字体和 3D 运行库来自公共 CDN，因此需要网络连接。
+打开 [localhost:8000/zh-CN/](http://localhost:8000/zh-CN/) 或 [localhost:8000](http://localhost:8000/)。
 
-仓库已经包含适合 GitHub Pages 的静态站点。以上命令用于本地浏览，线上 Pages 部署需要另外启用。
+</details>
+
+字体和 3D 运行库来自公共 CDN，因此线上和本地版本都需要网络连接。
 
 ## 让 agent 带你读一个仓库
 
