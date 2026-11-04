@@ -1,4 +1,4 @@
-/* Code Anatomy prelude: globals every graph file can use. build.py puts GH, RUN and SRC before this file. */
+/* Teachable Code prelude: globals every graph file can use. build.py puts GH, RUN and SRC before this file. */
 const escD = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const GRAPHS = {};
 function def(g){ GRAPHS[g.id] = g; return g; }
@@ -8,4 +8,4 @@ const VIEWS = {};      // reusable custom views: VIEWS.directory(opts) -> custom
 let FRAMES = [];       // key frames: {id, name, g, select?, layers?, repro?, scenario?, intervene?}
 let ROUTES = {};       // goal id -> [frame ids], ordered
 let PROFILE = { goals: [], times: [] };
-let PAGE = { id: "page", title: "Code Anatomy", h1: "Code Anatomy" };
+let PAGE = { id: "page", title: "Teachable Code", h1: "Teachable Code" };

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build one self-contained Code Anatomy page from a page folder.
+"""Build one self-contained Teachable Code page from a page folder.
 
 page folder layout
   repos.json   {"<key>": {"name": ..., "root": "/abs/path/to/clone", "url": "https://github.com/o/r/blob/<sha>/"}}
@@ -109,7 +109,7 @@ if errors:
 
 shell = open(os.path.join(A, "shell.html")).read()
 page = res["page"]
-out = (shell.replace("__TITLE__", page.get("title", "Code Anatomy")).replace("__H1__", page.get("h1", "Code Anatomy"))
+out = (shell.replace("__TITLE__", page.get("title", "Teachable Code")).replace("__H1__", page.get("h1", "Teachable Code"))
        .replace("/*__DATA__*/", data_js.replace(prelude, prelude + "\nconst SRC = " + json.dumps(SRC, ensure_ascii=False) + ";\n", 1))
        .replace("/*__ENGINE__*/", open(os.path.join(A, "engine.js")).read()))
 # escape "</script" inside the inline scripts (keep the real closing tags)

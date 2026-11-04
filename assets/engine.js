@@ -398,7 +398,7 @@ function jumpTo(gid, nid){
 function pathTo(gid){ const seen = {}; const q = [["meta"]]; while (q.length){ const p = q.shift(), g = GRAPHS[p[p.length-1]]; if (g.id===gid) return p; (g.nodes||[]).filter(n=>n.drill).forEach(n => { if (!seen[n.drill]){ seen[n.drill]=1; q.push([...p, n.drill]); } }); } return GRAPHS[gid] ? (gid==="meta"?["meta"]:["meta", gid]) : null; }
 $("#cleartrail").onclick = () => { trail = []; store.set("trail", trail); renderTrail(); load(G.id); };
 $("#exportb").onclick = () => {
-  const out = JSON.stringify({tool:"Code Anatomy", page:(typeof PAGE!=="undefined"&&PAGE.id)||"", profile, predictions:{total:predictLog.length, correct:predictLog.filter(x=>x.ok).length, log:predictLog}, trail, questions:pins, understood:rates}, null, 1);
+  const out = JSON.stringify({tool:"Teachable Code", page:(typeof PAGE!=="undefined"&&PAGE.id)||"", profile, predictions:{total:predictLog.length, correct:predictLog.filter(x=>x.ok).length, log:predictLog}, trail, questions:pins, understood:rates}, null, 1);
   const ta = $("#out"); ta.value = out; ta.hidden = false; ta.select();
   try{ navigator.clipboard.writeText(out).then(()=>$("#exportb").textContent="已复制", ()=>$("#exportb").textContent="请手动复制"); }catch(e){ $("#exportb").textContent = "请手动复制"; }
 };

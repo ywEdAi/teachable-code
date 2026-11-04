@@ -1,10 +1,18 @@
-# Code Anatomy
+# Teachable Code
 
-Code Anatomy is an agent skill that turns LLM and research repositories into interactive, animated walkthroughs. Follow workflows and data flow, connect paper concepts to code, and explore possible changes. Source snippets link to pinned commits, and results state where their evidence comes from.
+Teachable Code is an agent skill that turns LLM and research repositories into interactive, animated walkthroughs. Follow workflows and data flow, connect paper concepts to code, and explore possible changes. Source snippets link to pinned commits, and results state where their evidence comes from.
 
 ![SEAL 的一轮迭代：数据包沿着真实流程移动](docs/img/00-hero-flow.png)
 
 ---
+
+## Step lessons: follow one piece of data through any codebase
+
+`scripts/build_lesson.py` builds a one-screen page for any repo: the whole system stays on a map, each step lights up what it uses, and readers can zoom in and click any part or data point to reach its files and values. Models get 3D; apps get 2D. See `references/lessons.md`. Worked examples are in `examples/lessons/`: nanoGPT, mini-SGLang, SWE-agent, DeepTutor and vercel/ai-chatbot.
+
+### Demo site
+
+`docs/` is a ready-to-serve static site. In GitHub, open Settings → Pages and deploy from the `main` branch, `/docs` folder. Rebuild it with `python3 scripts/build_site.py`. The pages load fonts and Three.js from public CDNs.
 
 ## 它解决什么问题
 
@@ -14,13 +22,13 @@ Code Anatomy is an agent skill that turns LLM and research repositories into int
 - **数据**：每一步进来什么、出去什么，形状和内容怎么变；
 - **原因**：这一步实现的是论文里哪个想法，又在哪里和论文不一样。
 
-静态架构图只有框和线，README 只有文字，论文只有公式。Code Anatomy 把三者放在**同一张会动的图**上：节点是代码，连线是数据，场景让一个带标签的数据包按真实顺序走一遍；概念节点也在同一张画布上，用紫色虚线连到用到它的代码。
+静态架构图只有框和线，README 只有文字，论文只有公式。Teachable Code 把三者放在**同一张会动的图**上：节点是代码，连线是数据，场景让一个带标签的数据包按真实顺序走一遍；概念节点也在同一张画布上，用紫色虚线连到用到它的代码。
 
 ## 核心特点
 
 ### 1. 先问你，再画图（互动模式）
 
-同一个仓库，新手和要做 ablation 的研究者需要的图完全不一样。Code Anatomy 在动手之前先快速扫一遍仓库，然后**用仓库里真实的概念和模块**来提问：
+同一个仓库，新手和要做 ablation 的研究者需要的图完全不一样。Teachable Code 在动手之前先快速扫一遍仓库，然后**用仓库里真实的概念和模块**来提问：
 
 | 问什么 | 会改变什么 |
 |---|---|
@@ -36,7 +44,7 @@ Code Anatomy is an agent skill that turns LLM and research repositories into int
 
 ### 2. 判断这次侧重“理解”还是“迁移”
 
-Code Anatomy 把学习研究代码分成四种能力，每次请求选一个主侧重、一个次侧重：
+Teachable Code 把学习研究代码分成四种能力，每次请求选一个主侧重、一个次侧重：
 
 | 能力 | 先看什么 | 页面默认 |
 |---|---|---|

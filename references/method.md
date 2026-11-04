@@ -2,7 +2,7 @@
 
 ## Why graphs, and why moving ones
 
-A codebase hides three things a reader needs: **order** (what happens first), **data** (what passes between parts and how it changes), and **reasons** (which idea each part implements). Static architecture diagrams show boxes and arrows but not order or data. Prose shows reasons but not structure. Code Anatomy puts all three on one canvas: nodes are code, edges are data, scenarios move a labeled packet along the edges in the order a real request or training step does, and concept nodes sit on the same canvas, linked to the code that uses them.
+A codebase hides three things a reader needs: **order** (what happens first), **data** (what passes between parts and how it changes), and **reasons** (which idea each part implements). Static architecture diagrams show boxes and arrows but not order or data. Prose shows reasons but not structure. Teachable Code puts all three on one canvas: nodes are code, edges are data, scenarios move a labeled packet along the edges in the order a real request or training step does, and concept nodes sit on the same canvas, linked to the code that uses them.
 
 ## Shapes: decide what kind of thing the repo is
 

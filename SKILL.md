@@ -1,11 +1,11 @@
 ---
-name: code-anatomy
-description: Turn a research codebase (an ML paper repo, an LLM serving system, a multi-agent app) into one interactive page of animated graphs for learning it — system, workflow, directory, knowledge, paper→code, intervention and transfer views — after asking the learner about their goal and prior knowledge. Use when someone wants to understand, reproduce, modify or borrow from a GitHub repo, or says "visualize this repo / 帮我看懂这个代码库 / 复现这篇论文的代码 / 画出它的工作流".
+name: teachable-code
+description: Teach any codebase (a software app, a complex system, an LLM or a research repo) as an interactive page. Follows real data step by step with side-by-side input, transform and output, in 3D for tensors and training loops and 2D for apps, and offers deeper graph views such as paper→code and interventions, after asking the learner about their goal and prior knowledge. Use when someone wants to understand, reproduce, modify or borrow from a GitHub repo, or says "visualize this repo / 帮我看懂这个代码库 / 复现这篇论文的代码 / 画出它的工作流".
 ---
 
-# Code Anatomy
+# Teachable Code
 
-Code Anatomy makes the hidden *process* of a codebase visible: what runs, in what order, on what data, built on which ideas, and where you could change it. The output is one self-contained HTML page (published as an Artifact when the session can) whose canvas carries the meaning; text sits in a side panel and appears on demand.
+Teachable Code makes the hidden *process* of a codebase visible: what runs, in what order, on what data, built on which ideas, and where you could change it. The output is one self-contained HTML page (published as an Artifact when the session can) whose canvas carries the meaning; text sits in a side panel and appears on demand.
 
 Read `references/method.md` once before your first build. The other references are opened when the step below names them.
 
@@ -23,6 +23,12 @@ Every page serves one primary capability, sometimes with a second. They decide w
 Understanding is the floor: intervention and transfer pages still include a compact global map and workflow, because nobody can change what they cannot see.
 
 ## Workflow
+
+### 0. Route: lesson, deep page, or both
+
+Any repo can get a **step lesson**: one piece of data followed step by step across a permanent map of the whole system, all on one screen, for readers who do not code. Readers can zoom the map and click any part or data point to reach its files and values. Run `scripts/classify_repo.py REPO`, confirm the guess with the learner, and follow `references/lessons.md`. It uses 3D for tensors and training loops, and 2D for apps and systems.
+
+Use the graph page described below when the learner wants depth on a research repo: paper-to-code checks, levers on real data, or transfer. If you are unsure, start with the lesson.
 
 ### 1. Quick scan (before asking anything)
 
@@ -112,4 +118,8 @@ One short paragraph: what the page shows, the route you chose and why, the 2–3
 | `scripts/check.py` | Headless run of every scenario and frame, dark mode and phone-width checks |
 | `scripts/pyrun.py`, `scripts/ts_loader/` | Run a repo's own Python / TypeScript functions without its heavy dependencies |
 | `references/*.md` | Method, interview, graph spec, concepts, paper→code, interventions, transfer, running code |
+| `references/lessons.md`, `assets/lesson/` | Step lessons: method, schema and the 2D/3D runtime |
+| `scripts/classify_repo.py` | Guesses what kind of system a repo is, and which lesson fits |
+| `scripts/build_lesson.py`, `scripts/check_lesson.py` | Build a lesson from a pinned clone; play every step in a browser |
+| `examples/lessons/` | Worked lessons: nanoGPT (3D) and vercel/ai-chatbot (2D) |
 | `examples/four-repos/` | Complete worked example: SEP, mini-sglang, SEAL, OpenMAIC (24 graphs, 13 frames) |
