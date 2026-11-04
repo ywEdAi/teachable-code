@@ -1,5 +1,5 @@
 /* Page config: who it's for, the interaction mode, routes per goal, key frames. */
-PAGE = { id: "four-repos-v4", title: "Code Anatomy v4", h1: "Code Anatomy" };
+PAGE = { id: "four-repos-v4", title: "Teachable Code v4", h1: "Teachable Code" };
 
 /* ---------- interaction mode ---------- */
 PROFILE = {

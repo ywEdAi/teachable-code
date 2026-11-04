@@ -523,7 +523,7 @@ pre.val{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line
 
   /* ---------- boot ---------- */
   function boot() {
-    $("q").textContent = L.question; $("q").title = L.question; $("kicker").innerHTML = `<a href="../index.html" style="text-decoration:none"><b>← Teachable Code</b></a> · ${esc(L.repo.name)} @ ${esc(L.repo.commit.slice(0, 7))}`;
+    $("q").textContent = L.question; $("q").title = L.question; $("kicker").innerHTML = `<a href="../index.html" style="text-decoration:none"><b>← Teachable Code</b></a> · <a href="../zh-CN/lessons/swe-agent.html" onclick="this.hash=location.hash" lang="zh-CN">中文</a> · ${esc(L.repo.name)} @ ${esc(L.repo.commit.slice(0, 7))}`;
     $("limits").innerHTML = `<p><b>What this page rests on.</b></p>${L.limits.map(x => `<p>${esc(x)}</p>`).join("")}<p><span class="badge ran">ran</span> recorded from a real execution. <span class="badge read">read from code</span> taken from the source without running it. <span class="badge illustrative">example</span> written to show the shape.</p>`;
     $("bLimits").onclick = () => { const h = !$("limits").hidden; $("limits").hidden = h; $("bLimits").setAttribute("aria-expanded", String(!h)); $("bLimits").classList.toggle("on", !h); };
     $("legend").innerHTML = (L.stage.legend || []).map(x => `<span><i style="background:var(${x[1]})"></i>${esc(x[0])}</span>`).join("");

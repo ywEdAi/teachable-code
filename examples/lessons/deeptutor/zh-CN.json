@@ -1,0 +1,431 @@
+{
+  "source_commit": "f7aed0744c36c5afef16a4261c31ebee1208cac2",
+  "step_titles": [
+    "Saved before anything else",
+    "Everything is packed into one parcel",
+    "Which kind of help?",
+    "Who to be, and the rules",
+    "How to work",
+    "The tools it may ask for",
+    "Textbook passages, before it even asks",
+    "The model says what it will do, then asks",
+    "The code runs the search",
+    "The result joins the stack, and it loops",
+    "A reply with no tool request is the answer",
+    "You watched it happen",
+    "Same engine, ten kinds of tutor"
+  ],
+  "lesson": {
+    "title": "走进 DeepTutor",
+    "question": "AI 导师回答之前，会怎样处理你的问题？",
+    "limits": [
+      "未运行 DeepTutor，也没有调用模型。提示词、工具描述和限制来自固定提交的源码。问题、工具调用、教材片段和回答均为编写的示例。",
+      "完整系统提示词还包含随会话变化的工具、记忆、技能和工作区信息，因此这里的长度只统计固定部分。本课使用默认聊天模式与传统 RAG 知识库；其他模式及知识库类型的行为可能不同。"
+    ],
+    "folders": {
+      "deeptutor/app": "保存每轮对话，支持断线后回放。",
+      "deeptutor/runtime": "选择模式并执行模型循环。",
+      "deeptutor/agents": "各模式及其提示词。",
+      "deeptutor/capabilities": "附加能力与执行规则。",
+      "deeptutor/tools": "模型可请求的单次操作。",
+      "deeptutor/services": "检索、文档、模型和存储等服务。",
+      "deeptutor/core": "共享数据结构，例如本轮上下文。",
+      "web": "网页界面。",
+      "deeptutor_cli": "命令行版本。",
+      "tests": "代码检查。",
+      "docs-for-dev": "开发者文档。"
+    },
+    "stage": {
+      "objects": {
+        "you": {
+          "label": "你",
+          "sub": "聊天窗口"
+        },
+        "svc": {
+          "label": "对话服务",
+          "sub": "先保存当前轮次"
+        },
+        "packet": {
+          "label": "上下文包",
+          "sub": "本轮所需全部信息"
+        },
+        "orch": {
+          "label": "编排器",
+          "sub": "选择执行模式"
+        },
+        "bus": {
+          "label": "实时事件流",
+          "sub": "事件发生即发送"
+        },
+        "ctx": {
+          "label": "模型读取的内容",
+          "note": "指令、工具、教材和对话，按文本长度绘制。",
+          "items": [
+            {
+              "label": "身份与规则"
+            },
+            {
+              "label": "工作方式"
+            },
+            {
+              "label": "可用工具"
+            },
+            {
+              "label": "教材片段"
+            },
+            {
+              "label": "你的问题"
+            },
+            {
+              "label": "工具请求"
+            },
+            {
+              "label": "更多教材片段"
+            }
+          ]
+        },
+        "model": {
+          "label": "语言模型",
+          "sub": "每轮生成一次回复"
+        },
+        "rag": {
+          "label": "rag 工具",
+          "sub": "检索教材片段"
+        },
+        "kb": {
+          "label": "你的教材",
+          "sub": "可检索的知识库"
+        }
+      },
+      "legend": [
+        [
+          "指令",
+          "--tf"
+        ],
+        [
+          "工具",
+          "--out"
+        ],
+        [
+          "你的资料",
+          "--in"
+        ],
+        [
+          "你",
+          "--accent"
+        ]
+      ]
+    },
+    "steps": [
+      {
+        "chapter": "你提出问题",
+        "title": "先保存，再处理",
+        "cap": "开始处理前，先记录你的问题。",
+        "plain": "你针对教材提问。DeepTutor 首先保存本轮对话。即使连接中断，也能回放你错过的内容，而不是丢失回答。",
+        "input": {
+          "label": "你输入的问题"
+        },
+        "transform": {
+          "label": "开始一轮对话",
+          "text": "<code>start_turn(payload)</code>\n\n保存请求，并分配一个 ID。"
+        },
+        "output": {
+          "label": "已保存的轮次"
+        },
+        "log": [
+          "你",
+          "对话服务",
+          "请求",
+          "61 字符"
+        ]
+      },
+      {
+        "chapter": "你提出问题",
+        "title": "把所有信息装进一个包",
+        "cap": "后续组件读取同一个上下文包。",
+        "plain": "问题与此前消息、附件教材、可用工具、语言偏好和用户记忆一起打包。后续步骤都从这个统一的<b>上下文</b>中读取信息。",
+        "input": {
+          "label": "你的问题"
+        },
+        "transform": {
+          "label": "构建 UnifiedContext",
+          "text": "网页、命令行和 Python 入口使用同一种数据结构。"
+        },
+        "output": {
+          "label": "上下文包的字段"
+        },
+        "log": [
+          "对话服务",
+          "上下文",
+          "上下文包",
+          "1 轮"
+        ]
+      },
+      {
+        "chapter": "你提出问题",
+        "title": "你需要哪种帮助？",
+        "cap": "没有选择模式时，默认使用 chat。",
+        "plain": "DeepTutor 有十种称为 <b>capabilities</b> 的模式，例如聊天、深度研究和出题。未指定时使用 <b>chat</b>，由该模式接管本轮剩余流程。",
+        "input": {
+          "label": "所选模式"
+        },
+        "transform": {
+          "label": "默认使用 chat",
+          "text": "<code>context.active_capability or \"chat\"</code>"
+        },
+        "output": {
+          "label": "十种模式"
+        },
+        "log": [
+          "上下文",
+          "编排器",
+          "模式选择",
+          "chat"
+        ]
+      },
+      {
+        "chapter": "导师读取的内容",
+        "title": "先确定身份与规则",
+        "cap": "条形按固定文本的长度绘制。",
+        "plain": "系统提示词以“你是 DeepTutor，一个交互式导师与学习伙伴”开头，再加入规则，例如把附件当作资料，而不是对系统的指令。",
+        "why": "这条规则用于抵御文档中的恶意指令。",
+        "input": {
+          "label": "提示词文件"
+        },
+        "transform": {
+          "label": "组装文本块",
+          "text": "<code>_build_system_prompt(...)</code>\n\n本轮循环中，这段系统提示词保持不变。"
+        },
+        "output": {
+          "label": "源码中的真实文本"
+        },
+        "log": [
+          "提示词文件",
+          "上下文",
+          "系统提示词",
+          "1,780 字符"
+        ]
+      },
+      {
+        "chapter": "导师读取的内容",
+        "title": "再说明怎样工作",
+        "cap": "最大的固定文本块解释循环中的工作方式。",
+        "plain": "最大的文本块有 2,387 个字符，规定使用工具、查看结果并重复。每次调用工具前，先用通俗的话说明意图。<b>不再调用工具时，当前回复就是最终回答。</b>",
+        "why": "学习者也能看到导师正在做什么。",
+        "input": {
+          "label": "已有规则"
+        },
+        "transform": {
+          "label": "加入循环规则",
+          "text": "这个文本块规定整轮对话怎样执行。"
+        },
+        "output": {
+          "label": "源码中的真实文本"
+        },
+        "log": [
+          "提示词文件",
+          "上下文",
+          "循环规则",
+          "2,387 字符"
+        ]
+      },
+      {
+        "chapter": "导师读取的内容",
+        "title": "描述可以请求的工具",
+        "cap": "没有工具描述，模型就无法按约定请求工具。",
+        "plain": "每个工具都有 <b>schema</b>，说明名称、用途与必需参数。因为你附上教材，rag 工具被启用。工具列表随情境变化。",
+        "input": {
+          "label": "你附上的内容"
+        },
+        "transform": {
+          "label": "选择工具并构建 schema",
+          "text": "<code>_compose_enabled_tools(context)</code>"
+        },
+        "output": {
+          "label": "rag 的真实描述"
+        },
+        "log": [
+          "工具注册表",
+          "上下文",
+          "工具 schema",
+          "440 字符"
+        ]
+      },
+      {
+        "chapter": "导师读取的内容",
+        "title": "模型开口前，先找教材片段",
+        "cap": "模型启动前，先检索一次教材。",
+        "plain": "DeepTutor 用问题检索教材，每本最多加入 4,000 个字符。问题放在最后。教材片段属于用户消息，而保持不变的系统提示词位于前面。",
+        "why": "保持不变的开头更容易被缓存，减少后续轮次的重复计算。",
+        "input": {
+          "label": "检索的问题"
+        },
+        "transform": {
+          "label": "准备初始对话",
+          "text": "<code>_retrieve_kb_seed_block(...)</code>\n\n文本头部提醒：检索结果可能不完整或部分无关。"
+        },
+        "output": {
+          "label": "加入用户消息的内容"
+        },
+        "facts": [
+          [
+            "每本教材最多",
+            "4,000 个字符"
+          ],
+          [
+            "教材最多数量",
+            "3"
+          ]
+        ],
+        "log": [
+          "教材",
+          "上下文",
+          "教材片段",
+          "≤ 4,000 字符"
+        ]
+      },
+      {
+        "chapter": "执行循环",
+        "title": "模型说明意图，再请求工具",
+        "cap": "第 1 轮，最多 8 轮。",
+        "plain": "模型读取整个上下文。初始片段不够，它先写一句可见说明，再按 schema 请求工具。模型自身不执行检索。",
+        "input": {
+          "label": "发给模型的内容"
+        },
+        "transform": {
+          "label": "执行一轮",
+          "text": "<code>run_labeled_step(...)</code>\n\n回复被标记为工具调用或最终回答。"
+        },
+        "output": {
+          "label": "模型的回复"
+        },
+        "ask": {
+          "q": "究竟是谁检索教材？",
+          "options": [
+            "模型",
+            "DeepTutor 的代码",
+            "你"
+          ],
+          "explain": "模型只提出请求，由 DeepTutor 的代码实际执行。"
+        },
+        "log": [
+          "上下文",
+          "模型",
+          "全部消息",
+          "第 1 轮"
+        ]
+      },
+      {
+        "chapter": "执行循环",
+        "title": "由代码执行检索",
+        "cap": "工具在教材中寻找相关内容。",
+        "plain": "DeepTutor 的代码执行 rag 工具，根据查询寻找相关教材片段。这就是 <b>RAG</b>：先检索，再利用资料生成回答。",
+        "input": {
+          "label": "工具请求"
+        },
+        "transform": {
+          "label": "分发工具调用",
+          "text": "<code>_dispatch_tool_calls(...)</code>\n\n互不依赖的请求可以并行执行。"
+        },
+        "output": {
+          "label": "检索到的片段"
+        },
+        "log": [
+          "模型",
+          "rag 工具",
+          "查询",
+          "1 次调用"
+        ]
+      },
+      {
+        "chapter": "执行循环",
+        "title": "结果加入上下文，再来一轮",
+        "cap": "下一轮，模型才能读到检索结果。",
+        "plain": "检索结果加入上下文，模型带着已有信息继续。默认最多 <b>8 轮</b>；用尽预算后，会被要求根据已有信息回答，并说明仍不确定的部分。",
+        "input": {
+          "label": "检索到的片段"
+        },
+        "transform": {
+          "label": "追加结果并继续",
+          "text": "<code>messages.extend(outcome.tool_messages)</code>\n\n<code>DEFAULT_MAX_ROUNDS = 8</code>"
+        },
+        "output": {
+          "label": "轮次用尽时的真实提示词"
+        },
+        "log": [
+          "rag 工具",
+          "上下文",
+          "工具结果",
+          "示例"
+        ]
+      },
+      {
+        "chapter": "执行循环",
+        "title": "没有工具请求，就结束循环",
+        "cap": "没有额外的完成标志，只是不再请求工具。",
+        "plain": "下一轮模型已有足够资料，直接写回答，不再请求工具。循环结束。提示词直接规定：停止调用工具的那一轮，就是回答。",
+        "input": {
+          "label": "相比第 1 轮新增的资料"
+        },
+        "transform": {
+          "label": "检查标签并结束",
+          "text": "<code>if step.label in protocol.terminal: ... break</code>"
+        },
+        "output": {
+          "label": "最终回答"
+        },
+        "log": [
+          "模型",
+          "本轮",
+          "最终回答",
+          "第 2 轮"
+        ]
+      },
+      {
+        "chapter": "返回给你",
+        "title": "你可以边等边看",
+        "cap": "每个阶段以小事件发送给你。",
+        "plain": "思考说明、工具调用、来源和回答文字会在执行时通过<b>事件流</b>发送，并同时保存。这也让断线后的会话能够继续回放。",
+        "input": {
+          "label": "最终回答"
+        },
+        "transform": {
+          "label": "发布事件",
+          "text": "本轮使用统一事件流，网页、命令行和 Python 客户端都读取它。"
+        },
+        "output": {
+          "label": "源码中的事件类型"
+        },
+        "log": [
+          "模型",
+          "你",
+          "事件",
+          "实时"
+        ]
+      },
+      {
+        "chapter": "返回给你",
+        "title": "同一套引擎，十种导师模式",
+        "cap": "聊天只是一种模式，其他模式可能有更多阶段。",
+        "plain": "设计分两层：<b>工具</b>是模型选择的单个操作；<b>capabilities</b> 是接管整轮对话的完整流程。例如深度研究包含四个阶段，前面的接入与上下文准备仍然相同。",
+        "why": "构建 AI 应用时，这种分层值得参考。",
+        "input": {
+          "label": "同一个上下文包"
+        },
+        "transform": {
+          "label": "把本轮交给所选模式",
+          "text": "<code>await capability.run(context, bus)</code>"
+        },
+        "output": {
+          "label": "各模式的阶段数"
+        },
+        "log": [
+          "编排器",
+          "能力模式",
+          "整轮流程",
+          "10 种模式"
+        ]
+      }
+    ]
+  }
+}

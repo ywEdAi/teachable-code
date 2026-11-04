@@ -1,0 +1,374 @@
+{
+  "source_commit": "8603c8ea35ded822811d3201812e717b22edbbab",
+  "step_titles": [
+    "The message leaves your browser",
+    "The server checks you first",
+    "Your history is loaded",
+    "The system prompt",
+    "Your context",
+    "Tools and their schemas",
+    "The model answers with a request",
+    "The app runs the tool",
+    "The result goes back to the model",
+    "Words stream to your screen",
+    "Everything is saved"
+  ],
+  "lesson": {
+    "title": "走进 AI 聊天应用",
+    "question": "从按下发送到看到回答，中间发生了什么？",
+    "limits": [
+      "本页来自源码阅读，没有运行应用，也未调用模型。对话、工具调用和天气数值均为示意示例。",
+      "系统提示词与工具描述是固定提交中的原文。没有记录 AI SDK 针对不同模型供应商实际发送的完整请求。"
+    ],
+    "folders": {
+      "app": "页面与服务端路由，请求从这里进入。",
+      "components": "聊天窗口、消息、按钮等界面组件。",
+      "lib/ai": "模型提示词、工具与模型列表。",
+      "lib/db": "数据库表与查询。",
+      "artifacts": "文档与代码侧栏。",
+      "tests": "自动化检查。",
+      "public": "图片等静态文件。"
+    },
+    "stage": {
+      "objects": {
+        "browser": {
+          "label": "你的浏览器",
+          "sub": "聊天窗口"
+        },
+        "route": {
+          "label": "服务端路由",
+          "sub": "POST /api/chat"
+        },
+        "gate": {
+          "label": "请求检查",
+          "sub": "格式、身份、机器人与额度"
+        },
+        "db": {
+          "label": "数据库",
+          "sub": "聊天与消息"
+        },
+        "stack": {
+          "label": "模型收到的内容",
+          "note": "本次调用的所有输入，按文本长度绘制。",
+          "items": [
+            {
+              "label": "系统：身份"
+            },
+            {
+              "label": "系统：工具规则"
+            },
+            {
+              "label": "上下文：位置"
+            },
+            {
+              "label": "上下文：历史消息"
+            },
+            {
+              "label": "你：当前问题"
+            },
+            {
+              "label": "可以请求的工具"
+            }
+          ]
+        },
+        "model": {
+          "label": "语言模型",
+          "sub": "经 AI Gateway 调用 streamText"
+        },
+        "tool": {
+          "label": "getWeather 工具",
+          "sub": "仓库中的普通代码"
+        },
+        "ext": {
+          "label": "Open-Meteo",
+          "sub": "外部天气服务"
+        }
+      },
+      "legend": [
+        [
+          "系统指令",
+          "--tf"
+        ],
+        [
+          "上下文",
+          "--in"
+        ],
+        [
+          "你",
+          "--accent"
+        ],
+        [
+          "工具",
+          "--out"
+        ]
+      ]
+    },
+    "steps": [
+      {
+        "chapter": "按下发送",
+        "title": "消息离开浏览器",
+        "cap": "你只写了问题，模型读取的大部分内容稍后才加入。",
+        "plain": "问题被包装为一个请求，包含 ID 和所选模型。服务端有严格的 schema，例如每段文本最多 2,000 个字符。",
+        "input": {
+          "label": "你输入的内容"
+        },
+        "transform": {
+          "label": "包装请求",
+          "text": "请求必须符合 <code>postRequestBodySchema</code>。"
+        },
+        "output": {
+          "label": "发往服务端的 JSON"
+        },
+        "log": [
+          "浏览器",
+          "服务端",
+          "你的消息",
+          "38 字符"
+        ]
+      },
+      {
+        "chapter": "按下发送",
+        "title": "服务端先检查请求",
+        "cap": "检查失败就到此为止，不会调用回答模型。",
+        "plain": "调用模型前，服务端依次检查格式、机器人风险、登录状态和每小时额度。任何一项失败，都会返回错误。",
+        "input": {
+          "label": "请求与会话"
+        },
+        "transform": {
+          "label": "依次通过四道检查",
+          "text": "解析格式 → 机器人检查 → 会话身份 → 频率限制"
+        },
+        "output": {
+          "label": "通过检查或返回错误"
+        },
+        "ask": {
+          "q": "超过每小时额度后，回答模型还会执行吗？",
+          "options": [
+            "会执行，但隐藏回答",
+            "不会，请求在模型调用前终止",
+            "只处理短消息"
+          ],
+          "explain": "额度检查在模型调用前直接返回错误。"
+        },
+        "log": [
+          "服务端",
+          "检查",
+          "通过或终止",
+          ""
+        ]
+      },
+      {
+        "chapter": "按下发送",
+        "title": "读取历史消息",
+        "cap": "模型不会自行记住你，应用需要再次发送历史。",
+        "plain": "服务端从数据库读取本次聊天的旧消息，并保存新消息。新聊天还会通过一次独立模型调用生成标题。",
+        "input": {
+          "label": "聊天 ID"
+        },
+        "transform": {
+          "label": "读取并保存",
+          "text": "先调用 <code>getMessagesByChatId</code>，再调用 <code>saveMessages</code>。"
+        },
+        "output": {
+          "label": "消息列表"
+        },
+        "log": [
+          "服务端",
+          "数据库",
+          "读取历史，保存新消息",
+          ""
+        ]
+      },
+      {
+        "chapter": "组装模型输入",
+        "title": "加入系统提示词",
+        "cap": "条形按长度绘制：本例规则约为问题长度的 55 倍。",
+        "plain": "这是开发者编写、通常不向用户展示的文本，规定模型如何回答、何时使用工具。这里它比问题长得多，并随请求一同发送。",
+        "why": "AI 应用的规则与风格，往往来自这里。",
+        "input": {
+          "label": "模型是否支持工具？"
+        },
+        "transform": {
+          "label": "拼接提示词文本",
+          "text": "regularPrompt + hints + artifactsPrompt。模型不支持工具时，省略工具规则。"
+        },
+        "output": {
+          "label": "prompts.ts 中的原文"
+        },
+        "log": [
+          "prompts.ts",
+          "请求包",
+          "系统指令",
+          "2,333 字符"
+        ]
+      },
+      {
+        "chapter": "组装模型输入",
+        "title": "加入你的上下文",
+        "cap": "你没有输入位置，但请求里可能包含它。",
+        "plain": "服务端加入请求携带的信息，例如基于网络获取的大致位置，再放入旧消息和新问题。这些信息合起来就是上下文。",
+        "why": "因此“这里天气怎样”可能不需要再次填写城市。",
+        "input": {
+          "label": "网络请求中的信息"
+        },
+        "transform": {
+          "label": "填入模板",
+          "text": "把字段转成句子，再加入对话消息。"
+        },
+        "output": {
+          "label": "加入请求的上下文"
+        },
+        "log": [
+          "请求",
+          "请求包",
+          "位置、历史与问题",
+          "127 字符"
+        ]
+      },
+      {
+        "chapter": "组装模型输入",
+        "title": "工具及其参数格式",
+        "cap": "schema 就像模型请求工具时必须填写的表单。",
+        "plain": "模型会收到工具列表，了解各工具的用途和所需参数。它不能自行运行工具，只能按格式提出请求。",
+        "why": "工具描述也是指令，模型通过阅读它们选择工具。",
+        "input": {
+          "label": "代码中的工具"
+        },
+        "transform": {
+          "label": "向模型描述工具",
+          "text": "<code>activeTools</code> 列出可请求的五种工具。"
+        },
+        "output": {
+          "label": "getWeather 参数表单"
+        },
+        "log": [
+          "tools/",
+          "请求包",
+          "5 种工具描述与参数",
+          "884 字符+"
+        ]
+      },
+      {
+        "chapter": "模型循环",
+        "title": "模型回复的是一个工具请求",
+        "cap": "首次回复是一张填好的表单。",
+        "plain": "整个请求发送给模型。因为它不知道实时天气，所以选择请求工具并填入参数。这一步的工具选择由模型完成。",
+        "input": {
+          "label": "当前依赖的内容"
+        },
+        "transform": {
+          "label": "执行模型调用",
+          "text": "<code>streamText</code> 发送指令、消息和工具说明。"
+        },
+        "output": {
+          "label": "工具调用"
+        },
+        "ask": {
+          "q": "是谁实际获取天气？",
+          "options": [
+            "模型自行查询",
+            "应用代码，在模型提出请求之后",
+            "浏览器"
+          ],
+          "explain": "模型只生成工具请求，仓库中的代码负责执行。"
+        },
+        "log": [
+          "请求包",
+          "模型",
+          "全部上下文 → 1 次工具调用",
+          ""
+        ]
+      },
+      {
+        "chapter": "模型循环",
+        "title": "应用执行工具",
+        "cap": "这里运行的是普通代码。",
+        "plain": "应用检查参数，通过外部服务把 “Paris” 转成坐标，再请求天气预报，收集结果。",
+        "input": {
+          "label": "工具调用"
+        },
+        "transform": {
+          "label": "先查询坐标，再取预报",
+          "text": "<code>geocodeCity</code> → 坐标 → 预报 API。城市不存在时返回错误说明。"
+        },
+        "output": {
+          "label": "工具结果"
+        },
+        "log": [
+          "工具",
+          "Open-Meteo",
+          "城市 → 坐标 → 预报",
+          "2 次调用"
+        ]
+      },
+      {
+        "chapter": "模型循环",
+        "title": "结果再次发给模型",
+        "cap": "模型带着工具结果，再读取一次上下文。",
+        "plain": "结果加入对话，模型重新读取全部内容，再决定继续请求工具还是回答。这里最多允许 5 轮，防止无限循环。",
+        "why": "这就是代理循环：请求、执行、读回结果。",
+        "input": {
+          "label": "工具结果"
+        },
+        "transform": {
+          "label": "再次运行模型",
+          "text": "<code>stopWhen: isStepCount(5)</code> 限制轮次数量。"
+        },
+        "output": {
+          "label": "这次生成文字回答"
+        },
+        "log": [
+          "工具",
+          "模型",
+          "加入结果，第 2 轮，最多 5 轮",
+          ""
+        ]
+      },
+      {
+        "chapter": "返回给你",
+        "title": "文字流向屏幕",
+        "cap": "模型边写，浏览器边显示。",
+        "plain": "回答不必全部写完再发送。文本片段经服务端持续流向浏览器，因此你能看到逐步出现的回答。",
+        "input": {
+          "label": "模型生成的片段"
+        },
+        "transform": {
+          "label": "收到就转发",
+          "text": "<code>toUIMessageStream</code> 把片段转成聊天窗口理解的事件。"
+        },
+        "output": {
+          "label": "屏幕上的回答"
+        },
+        "log": [
+          "模型",
+          "浏览器",
+          "逐段发送回答",
+          ""
+        ]
+      },
+      {
+        "chapter": "返回给你",
+        "title": "保存完整对话",
+        "cap": "这些消息将成为下次请求的上下文。",
+        "plain": "流结束时，应用保存完整消息。下次提问时，第 3 步会重新读取它们，模型需要处理的上下文随之增长。",
+        "why": "长对话可能更慢、更贵，因为历史会随每次请求重新发送。",
+        "input": {
+          "label": "完整消息"
+        },
+        "transform": {
+          "label": "写入数据库",
+          "text": "在 <code>onEnd</code> 中执行 <code>saveMessages</code>。"
+        },
+        "output": {
+          "label": "聊天历史"
+        },
+        "log": [
+          "服务端",
+          "数据库",
+          "完整消息",
+          ""
+        ]
+      }
+    ]
+  }
+}

@@ -16,7 +16,7 @@ with sync_playwright() as p:
     try: b = p.chromium.launch(channel="chrome", args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
     except Exception: b = p.chromium.launch(args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
     pg = b.new_page(viewport={"width": 1440, "height": 860}); pg.on("pageerror", lambda e: errs.append("page error: " + str(e))); pg.on("console", lambda m: m.type == "error" and errs.append("console: " + m.text[:160]))
-    pg.goto("file://" + tmp.name, wait_until="domcontentloaded", timeout=90000); pg.wait_for_function("window.__lesson", timeout=90000); info = pg.evaluate("({n:__lesson.count,mode:__lesson.mode,ok:__lesson.has3d})")
+    pg.goto("file://" + tmp.name, wait_until="domcontentloaded", timeout=90000); pg.wait_for_function("window.__lesson", timeout=90000); info = pg.evaluate("({n:__lesson.count,mode:__lesson.mode,ok:__lesson.has3d,lang:document.documentElement.lang})")
     if not info["ok"]: errs.append("stage did not start")
     # the first frame can take seconds on software WebGL while shaders compile
     for _ in range(40):
@@ -44,14 +44,14 @@ with sync_playwright() as p:
     tried = 0
     for k in pg.evaluate("__lesson.stations"):
         x, y = pg.evaluate(f"__lesson.stage.screenOf({k!r})"); pg.mouse.click(x, y); pg.wait_for_timeout(150); tried += 1; t = pg.inner_text("#side")
-        if "PART OF THE SYSTEM" not in t: errs.append(f"clicking part {k} opened nothing"); continue
-        if "PROJECT FILES" not in t: errs.append(f"part {k}: no files listed")
+        if ("系统部件" if info["lang"] == "zh-CN" else "PART OF THE SYSTEM") not in t: errs.append(f"clicking part {k} opened nothing"); continue
+        if ("项目文件" if info["lang"] == "zh-CN" else "PROJECT FILES") not in t: errs.append(f"part {k}: no files listed")
     pg.keyboard.press("Escape")
     f = pg.evaluate("[...new Set(Object.values(__lesson.stations))][0]")
     links = pg.evaluate("document.querySelectorAll('.tree .f:not(.quiet)').length")
     if not links: errs.append("folder shows no linked files")
     pg.locator(".tree .f:not(.quiet)").first.click(); pg.wait_for_timeout(150)
-    if "PROJECT FILE" not in pg.inner_text("#side"): errs.append("clicking a file opened nothing")
+    if ("项目文件" if info["lang"] == "zh-CN" else "PROJECT FILE") not in pg.inner_text("#side"): errs.append("clicking a file opened nothing")
     pg.keyboard.press("Escape")
     if a.shots: pg.screenshot(path=os.path.join(a.shots, "final.png"))
     ph = b.new_page(viewport={"width": 400, "height": 860}); ph.goto("file://" + tmp.name, wait_until="domcontentloaded", timeout=90000); ph.wait_for_function("window.__lesson", timeout=90000); ph.wait_for_timeout(1200)

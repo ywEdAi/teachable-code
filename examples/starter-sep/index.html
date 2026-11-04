@@ -303,7 +303,7 @@ header .spacer{flex:1}
 <script>
 const GH = {"sep": "https://github.com/OATML/semantic-entropy-probes/blob/02e2167dd1c00e27080d421f9b40e13e00f0452b/"};
 const RUN = {"sep": {"confident (Q: capital of France?)": {"responses": ["Paris", "It's Paris", "Paris", "The capital is Paris", "Paris, France", "Paris", "Paris", "It's Paris", "Paris", "Paris"], "semantic_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "nli_calls": 18, "distinct_strings": 4, "clusters": 1, "cluster_assignment_entropy": -0.0, "semantic_entropy_rao": -0.0, "regular_entropy": 0.25, "logsumexp_sum_agg_quirk": [-2.93]}, "lexically diverse but semantically sure (Q: when did Titanic sink?)": {"responses": ["1912", "April 1912", "In 1912", "It sank in 1912", "1912", "april 1912", "in 1912", "1912", "It sank in 1912", "April 1912"], "semantic_ids": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "nli_calls": 18, "distinct_strings": 4, "clusters": 1, "cluster_assignment_entropy": -0.0, "semantic_entropy_rao": -0.0, "regular_entropy": 0.76, "logsumexp_sum_agg_quirk": [-3.402]}, "confabulating (Q: obscure fact)": {"responses": ["1912", "1915", "1913", "1915", "1912", "1913", "1915", "1912", "1913", "1915"], "semantic_ids": [0, 1, 2, 1, 0, 2, 1, 0, 2, 1], "nli_calls": 48, "distinct_strings": 3, "clusters": 3, "cluster_assignment_entropy": 1.089, "semantic_entropy_rao": 1.075, "regular_entropy": 1.19, "logsumexp_sum_agg_quirk": [-5.098, -4.711, -5.198]}}};
-/* Code Anatomy prelude: globals every graph file can use. build.py puts GH, RUN and SRC before this file. */
+/* Teachable Code prelude: globals every graph file can use. build.py puts GH, RUN and SRC before this file. */
 const escD = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const GRAPHS = {};
 function def(g){ GRAPHS[g.id] = g; return g; }
@@ -313,7 +313,7 @@ const VIEWS = {};      // reusable custom views: VIEWS.directory(opts) -> custom
 let FRAMES = [];       // key frames: {id, name, g, select?, layers?, repro?, scenario?, intervene?}
 let ROUTES = {};       // goal id -> [frame ids], ordered
 let PROFILE = { goals: [], times: [] };
-let PAGE = { id: "page", title: "Code Anatomy", h1: "Code Anatomy" };
+let PAGE = { id: "page", title: "Teachable Code", h1: "Teachable Code" };
 
 const SRC = {"sep|semantic_uncertainty/generate_answers.py|176|181": "            for i in range(num_generations):\n\n                # Temperature for first generation is always `0.1`.\n                temperature = 0.1 if i == 0 else args.temperature\n\n                predicted_answer, token_log_likelihoods, (embedding, emb_before_eos, emb_last_before_gen) = model.predict(local_prompt, temperature, return_latent=True) ", "sep|semantic_uncertainty/uncertainty/uncertainty_measures/semantic_entropy.py|178|192": "    def are_equivalent(text1, text2):\n\n        implication_1 = model.check_implication(text1, text2, example=example)\n        implication_2 = model.check_implication(text2, text1, example=example)  # pylint: disable=arguments-out-of-order\n        assert (implication_1 in [0, 1, 2]) and (implication_2 in [0, 1, 2])\n\n        if strict_entailment:\n            semantically_equivalent = (implication_1 == 2) and (implication_2 == 2)\n\n        else:\n            implications = [implication_1, implication_2]\n            # Check if none of the implications are 0 (contradiction) and not both of them are neutral.\n            semantically_equivalent = (0 not in implications) and ([1, 1] != implications)\n\n        return semantically_equivalent", "sep|semantic_uncertainty/uncertainty/uncertainty_measures/semantic_entropy.py|273|278": "    n_generations = len(semantic_ids)\n    counts = np.bincount(semantic_ids)\n    probabilities = counts/n_generations\n    assert np.isclose(probabilities.sum(), 1)\n    entropy = - (probabilities * np.log(probabilities)).sum()\n    return entropy"};
 /* VIEWS.directory: the repo's real folder tree next to the workflow stages.
@@ -849,7 +849,7 @@ function jumpTo(gid, nid){
 function pathTo(gid){ const seen = {}; const q = [["meta"]]; while (q.length){ const p = q.shift(), g = GRAPHS[p[p.length-1]]; if (g.id===gid) return p; (g.nodes||[]).filter(n=>n.drill).forEach(n => { if (!seen[n.drill]){ seen[n.drill]=1; q.push([...p, n.drill]); } }); } return GRAPHS[gid] ? (gid==="meta"?["meta"]:["meta", gid]) : null; }
 $("#cleartrail").onclick = () => { trail = []; store.set("trail", trail); renderTrail(); load(G.id); };
 $("#exportb").onclick = () => {
-  const out = JSON.stringify({tool:"Code Anatomy", page:(typeof PAGE!=="undefined"&&PAGE.id)||"", profile, predictions:{total:predictLog.length, correct:predictLog.filter(x=>x.ok).length, log:predictLog}, trail, questions:pins, understood:rates}, null, 1);
+  const out = JSON.stringify({tool:"Teachable Code", page:(typeof PAGE!=="undefined"&&PAGE.id)||"", profile, predictions:{total:predictLog.length, correct:predictLog.filter(x=>x.ok).length, log:predictLog}, trail, questions:pins, understood:rates}, null, 1);
   const ta = $("#out"); ta.value = out; ta.hidden = false; ta.select();
   try{ navigator.clipboard.writeText(out).then(()=>$("#exportb").textContent="已复制", ()=>$("#exportb").textContent="请手动复制"); }catch(e){ $("#exportb").textContent = "请手动复制"; }
 };

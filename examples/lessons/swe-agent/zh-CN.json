@@ -1,0 +1,508 @@
+{
+  "source_commit": "3ea751c087f32b16e039a2233dd6eefecef325d5",
+  "step_titles": [
+    "It starts with a bug report",
+    "The rules go in first",
+    "Then the task",
+    "The model reads everything and picks one command",
+    "The harness runs it on a real computer",
+    "The result becomes a new layer",
+    "A viewer that shows 100 lines at a time",
+    "A bad edit is refused",
+    "It reads the error and fixes the indentation",
+    "It checks its own work",
+    "All eleven turns",
+    "Old output can be cut down",
+    "The result is a one-line patch"
+  ],
+  "lesson": {
+    "title": "SWE-agent 执行框架",
+    "question": "是什么让语言模型能够修复真实项目中的 bug？",
+    "limits": [
+      "对话、命令与输出来自仓库提交的真实回放记录 replay__marshmallow-code__marshmallow-1867__function_calling__install-1。该文件记录 token 用量为 0，因此这是一段示范回放，并非此次运行中生成的实时模型轨迹。我们未运行 SWE-agent，也未调用模型。",
+      "回放使用论文时期的旧接口。仓库当前默认配置采用更短的系统提示词、不同的编辑工具，且不再裁剪旧输出。",
+      "这里用字符数代替 token 数。裁剪后的长度由我们按仓库规则计算。12.5% 与 87.7% 来自作者论文 arXiv 2405.15793，本项目未复现这些结果。"
+    ],
+    "folders": {
+      "sweagent/agent": "代理循环：询问模型、执行命令、记录结果。",
+      "sweagent/environment": "执行命令的沙箱环境。",
+      "sweagent/tools": "解析模型回复并转为命令。",
+      "tools": "模型可用的 open、search、edit 等命令。",
+      "config": "提示词、工具和限制的预设配置。",
+      "trajectories": "已录制的运行轨迹与示例。",
+      "tests": "代码检查。",
+      "docs": "项目使用文档。"
+    },
+    "stage": {
+      "stations": {
+        "bug": {
+          "label": "任务",
+          "note": "示范记录中保存的一条真实 bug 报告。"
+        },
+        "ctx": {
+          "label": "上下文：模型读取什么",
+          "note": "所有历史消息按长度堆叠，模型只能读取这些内容。"
+        },
+        "model": {
+          "label": "语言模型",
+          "note": "读取全部上下文，并回复一条命令，不直接操作计算机。"
+        },
+        "comp": {
+          "label": "沙箱计算机",
+          "note": "执行框架在这里运行模型请求的命令。"
+        },
+        "tools": {
+          "label": "可用命令",
+          "note": "为模型设计的工具，例如每次显示 100 行的查看器，以及拒绝错误代码的编辑命令。"
+        },
+        "fixed": {
+          "label": "结果",
+          "note": "修复后再次运行同一个测试。"
+        }
+      },
+      "legend": [
+        [
+          "系统指令",
+          "--tf"
+        ],
+        [
+          "任务",
+          "--accent"
+        ],
+        [
+          "模型操作",
+          "--out"
+        ],
+        [
+          "执行结果",
+          "--in"
+        ]
+      ],
+      "objects": {
+        "tower": {
+          "layers": [
+            {
+              "label": "系统提示词",
+              "who": "系统提示词"
+            },
+            {
+              "label": "bug 报告",
+              "who": "任务"
+            },
+            {
+              "who": "模型：创建"
+            },
+            {
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：编辑"
+            },
+            {
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：执行命令"
+            },
+            {
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：执行命令"
+            },
+            {
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：查找文件"
+            },
+            {
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：打开文件"
+            },
+            {
+              "label": "文件视图：100 行",
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：编辑"
+            },
+            {
+              "label": "被拒绝的编辑",
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：编辑"
+            },
+            {
+              "label": "修复后的文件",
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：执行命令"
+            },
+            {
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：执行命令"
+            },
+            {
+              "who": "沙箱输出"
+            },
+            {
+              "who": "模型：提交"
+            },
+            {
+              "who": "沙箱输出"
+            }
+          ]
+        }
+      }
+    },
+    "steps": [
+      {
+        "chapter": "任务准备",
+        "title": "从 bug 报告开始",
+        "cap": "真实问题：时长被错误取整，得到 344，而不是 345。",
+        "plain": "Python 库 marshmallow 中，把 345 毫秒转成数值却得到 344。SWE-agent 的任务是在项目副本中修复这个问题。",
+        "why": "模型自身不能读取项目或执行程序。让它能够尝试的外围系统称为 <b>harness，执行框架</b>。",
+        "input": {
+          "label": "issue 中的描述"
+        },
+        "transform": {
+          "label": "填入标准模板",
+          "text": "<code>add_instance_template_to_history</code> 把问题写入标准任务消息。"
+        },
+        "output": {
+          "label": "需要修复的问题"
+        },
+        "log": [
+          "问题",
+          "执行框架",
+          "bug 报告",
+          "1 个问题"
+        ]
+      },
+      {
+        "chapter": "任务准备",
+        "title": "先放入规则",
+        "cap": "文本塔按真实字符长度绘制。",
+        "plain": "第一层是 <b>system prompt</b>，共 1,658 个字符，说明文件查看器与可用命令。这座塔就是<b>上下文</b>，每一层的高度反映真实长度。",
+        "input": {
+          "label": "配置文件"
+        },
+        "transform": {
+          "label": "写入第一层",
+          "text": "<code>add_system_message_to_history</code>"
+        },
+        "output": {
+          "label": "第 1 层"
+        },
+        "log": [
+          "配置",
+          "上下文",
+          "系统提示词",
+          "1658 字符"
+        ]
+      },
+      {
+        "chapter": "任务准备",
+        "title": "再加入任务",
+        "cap": "第 2 层是 bug 报告与工作建议。",
+        "plain": "第二层包含 bug 描述和“先复现问题”等工作建议，共 3,661 个字符。模型尚未开始行动，就已收到约 5,300 个字符。",
+        "input": {
+          "label": "问题描述"
+        },
+        "transform": {
+          "label": "加入上下文",
+          "text": "新增一条消息，此时不会替换已有消息。"
+        },
+        "output": {
+          "label": "第 2 层"
+        },
+        "log": [
+          "执行框架",
+          "上下文",
+          "任务",
+          "3661 字符"
+        ]
+      },
+      {
+        "chapter": "一轮循环",
+        "title": "模型读完全部内容，选择一条命令",
+        "cap": "每轮都发送整座文本塔，模型回复一条命令。",
+        "plain": "循环开始。执行框架发送全部上下文，模型回复分析和<b>一条命令</b>。本次首先选择复现 bug。",
+        "input": {
+          "label": "发送给模型的内容"
+        },
+        "transform": {
+          "label": "询问模型",
+          "text": "<code>self.model.query(history)</code>\n\n回复被拆成分析与命令。"
+        },
+        "ask": {
+          "q": "模型每次返回什么？",
+          "options": [
+            "修好的完整代码",
+            "一条待执行命令",
+            "所有步骤的列表"
+          ],
+          "explain": "每次只做一个小动作，读取结果后再选下一步。"
+        },
+        "output": {
+          "items": [
+            {
+              "label": "分析"
+            },
+            {
+              "label": "命令"
+            }
+          ]
+        },
+        "log": [
+          "上下文",
+          "模型",
+          "全部消息",
+          "5319 字符"
+        ]
+      },
+      {
+        "chapter": "一轮循环",
+        "title": "执行框架在计算机上运行命令",
+        "cap": "模型只写文本，实际运行由执行框架完成。",
+        "plain": "框架读取模型给出的命令，并在含有项目副本的<b>沙箱</b>中执行，捕获屏幕输出。",
+        "input": {
+          "label": "命令"
+        },
+        "transform": {
+          "label": "在沙箱运行",
+          "text": "<code>self._env.communicate(input=run_action, ...)</code>"
+        },
+        "output": {
+          "label": "返回的输出"
+        },
+        "log": [
+          "模型",
+          "沙箱",
+          "命令",
+          "19 字符"
+        ]
+      },
+      {
+        "chapter": "一轮循环",
+        "title": "结果成为新的一层",
+        "cap": "本轮结束，文本塔变高，循环继续。",
+        "plain": "输出被加入上下文，然后再次询问模型。过程就是询问、运行、记录、重复。模型通过不断增长的历史文档获取过去的信息。",
+        "why": "这里的代理记忆，就是一份不断增长的文档。",
+        "input": {
+          "label": "沙箱输出"
+        },
+        "transform": {
+          "label": "将命令与结果一起记录",
+          "text": "<code>add_step_to_history(step)</code>\n\n先加入模型命令，再加入执行输出。"
+        },
+        "output": {
+          "label": "上下文中的字符数"
+        },
+        "log": [
+          "沙箱",
+          "上下文",
+          "输出",
+          "112 字符"
+        ]
+      },
+      {
+        "chapter": "为模型设计的工具",
+        "title": "一次只看 100 行的查看器",
+        "cap": "文件共 1,997 行，模型只读取 100 行窗口。",
+        "plain": "论文的核心想法是为模型设计命令接口。一次输出 1,997 行会塞满上下文，因此 <b>open</b> 只显示 100 行，并说明还隐藏了多少内容。",
+        "why": "作者称之为 agent-computer interface，并报告它能改善模型创建与编辑代码的表现。",
+        "input": {
+          "label": "命令"
+        },
+        "transform": {
+          "label": "只显示一个窗口",
+          "text": "<code>WINDOW: 100</code> 决定窗口大小。"
+        },
+        "output": {
+          "label": "查看器输出"
+        },
+        "facts": [
+          [
+            "论文",
+            "arXiv 2405.15793"
+          ],
+          [
+            "窗口",
+            "100 行"
+          ],
+          [
+            "文件长度",
+            "1,997 行"
+          ]
+        ],
+        "log": [
+          "模型",
+          "沙箱",
+          "打开",
+          "4222 字符返回"
+        ]
+      },
+      {
+        "chapter": "为模型设计的工具",
+        "title": "错误编辑被拒绝",
+        "cap": "当前最高的一层是拒绝信息，原文件没有被改坏。",
+        "plain": "第一次修复缩进错误。编辑工具先检查代码，拒绝有问题的修改并说明原因。该回复长达 9,063 个字符，文件保持原状。",
+        "why": "错误消耗了一轮，而没有留下损坏的代码。",
+        "input": {
+          "label": "第一次尝试"
+        },
+        "transform": {
+          "label": "保存前检查",
+          "text": "使用 flake8 检查编辑后的文件。如出现新错误，撤销修改并报告。"
+        },
+        "output": {
+          "label": "拒绝信息"
+        },
+        "log": [
+          "沙箱",
+          "上下文",
+          "拒绝信息",
+          "9063 字符"
+        ]
+      },
+      {
+        "chapter": "为模型设计的工具",
+        "title": "读取错误，再修正缩进",
+        "cap": "同一处修改，这次缩进正确。",
+        "plain": "下一轮模型读取拒绝信息，保留相同修改意图并纠正缩进。这次通过检查，编辑被保存。",
+        "input": {
+          "label": "第二次尝试"
+        },
+        "transform": {
+          "label": "检查通过后保存",
+          "text": "没有新增错误，因此保留编辑。"
+        },
+        "output": {
+          "label": "工具回复"
+        },
+        "log": [
+          "模型",
+          "沙箱",
+          "编辑",
+          "1 行"
+        ]
+      },
+      {
+        "chapter": "为模型设计的工具",
+        "title": "验证修复结果",
+        "cap": "与第 3 轮相同的测试，得到不同结果。",
+        "plain": "模型再次执行复现测试。修复前输出 344，修复后输出 345。验证依据是实际输出的数值。",
+        "why": "输入与输出符合 bug 报告提出的要求。",
+        "input": {
+          "label": "修复前的测试"
+        },
+        "transform": {
+          "label": "第 9 轮执行相同命令",
+          "text": "<code>python reproduce.py</code>"
+        },
+        "output": {
+          "label": "修复后的测试"
+        },
+        "log": [
+          "沙箱",
+          "上下文",
+          "测试输出",
+          "345"
+        ]
+      },
+      {
+        "chapter": "整段运行",
+        "title": "完整的十一轮",
+        "cap": "按播放键查看整段回放。",
+        "plain": "最后一轮，模型读取 26,855 个字符后选择一个词：<b>submit</b>。多数轮次只增加少量内容，少数大输出却占据了文本塔的大部分高度。",
+        "input": {
+          "label": "前 6 轮发送的字符数"
+        },
+        "transform": {
+          "label": "执行循环",
+          "text": "<code>while not done: step()</code>\n\n询问、运行、记录。"
+        },
+        "output": {
+          "label": "后 5 轮发送的字符数"
+        },
+        "log": [
+          "全部",
+          "全部",
+          "11 轮",
+          "27545 字符"
+        ]
+      },
+      {
+        "chapter": "整段运行",
+        "title": "旧输出可以裁剪",
+        "cap": "旧配置只完整保留最后 5 条环境输出。",
+        "plain": "上下文可能超出模型容量。论文时期的配置把更早的输出替换为一行省略说明。本次按规则计算，字符数由 27,545 缩减为 22,352。",
+        "why": "代码注释指出，新模型往往不需要这样裁剪，而且裁剪会影响提示词缓存。",
+        "input": {
+          "label": "完整字符数"
+        },
+        "transform": {
+          "label": "保留最近 5 条输出",
+          "text": "<code>type: last_n_observations, n: 5</code>\n\n只裁剪模型看到的上下文，完整运行记录仍保留。"
+        },
+        "output": {
+          "label": "模型实际读取的字符数"
+        },
+        "log": [
+          "上下文",
+          "模型",
+          "裁剪历史",
+          "22352 字符"
+        ]
+      },
+      {
+        "chapter": "整段运行",
+        "title": "最终得到一行补丁",
+        "cap": "十一轮、27,545 个上下文字符，修改一行代码。",
+        "plain": "<b>submit</b> 把改动保存为补丁并结束运行。修复只增加 <b>round</b>。作者报告在当时的 SWE-bench 首次尝试中解决 12.5% 的问题，并称其为当时最佳结果；本项目未复现该成绩。",
+        "input": {
+          "label": "修改前"
+        },
+        "transform": {
+          "label": "打包改动",
+          "text": "<code>submit</code> 保存 diff 并结束循环。"
+        },
+        "output": {
+          "label": "修改后"
+        },
+        "facts": [
+          [
+            "退出状态",
+            "submitted"
+          ],
+          [
+            "轮次",
+            "11"
+          ],
+          [
+            "SWE-bench",
+            "12.5%，作者报告"
+          ],
+          [
+            "HumanEvalFix",
+            "87.7%，作者报告"
+          ]
+        ],
+        "log": [
+          "沙箱",
+          "你",
+          "补丁",
+          "1 行"
+        ]
+      }
+    ]
+  }
+}

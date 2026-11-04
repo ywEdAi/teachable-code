@@ -1,0 +1,450 @@
+{
+  "source_commit": "9a91cfafe754aa85daee49998176275667eb58f2",
+  "step_titles": [
+    "Your message becomes tokens",
+    "It joins a waiting line",
+    "Has any of this been seen before?",
+    "Every token leaves a result in memory",
+    "Later words read earlier ones",
+    "The answer grows one word at a time",
+    "The work is filed in the tree",
+    "A new question, the same opening",
+    "The tree splits where they differ",
+    "It points at old results instead of redoing them",
+    "Only two tokens are computed",
+    "Two arrive at the same moment",
+    "Memory fills up, so the oldest tip goes",
+    "What the shared openings saved"
+  ],
+  "lesson": {
+    "title": "mini-SGLang 缓存机制",
+    "question": "为什么两次提问开头相同时，第二次需要计算的内容更少？",
+    "limits": [
+      "没有运行 mini-sglang 原项目。数值来自我们按缓存规则自写的小型模拟：26 个内存槽位，以单词代替 token，使用随机权重的单层注意力，每个 token 有 12 个数。提示词是示例，计算量用于解释规则，不代表实际速度。",
+      "真实模型的层数与内存规模更大。真实调度器在 prefill 后就保存前缀，而本次回放简化为请求结束时保存一次。",
+      "同批次到达的情况来自源码阅读与自写回放，尚未在 GPU 上验证，也未向原项目报告。"
+    ],
+    "folders": {
+      "python/minisgl/server": "接收网络请求的入口。",
+      "python/minisgl/tokenizer": "把文本转为数字，再转回文本。",
+      "python/minisgl/scheduler": "决定下一个执行谁，以及哪些结果已保存。",
+      "python/minisgl/kvcache": "保存结果，并用前缀树查找它们。",
+      "python/minisgl/layers": "模型组件，包括注意力。",
+      "python/minisgl/engine": "在 GPU 上执行模型。",
+      "benchmark": "速度测试。",
+      "docs": "项目自身的说明文档。",
+      "tests": "代码检查。"
+    },
+    "stage": {
+      "stations": {
+        "reqs": {
+          "label": "请求",
+          "note": "每条消息切成 token。这里一个 token 是一个单词。"
+        },
+        "line": {
+          "label": "等待队列",
+          "note": "请求等待 GPU 空位，再组合为一个批次执行。"
+        },
+        "tree": {
+          "label": "已保存的前缀树",
+          "note": "记录哪些开头已计算，以及结果所在的内存位置。"
+        },
+        "gpu": {
+          "label": "GPU 内存：26 个槽位",
+          "note": "保存 key 和 value，每个 token 占一行。回答发出后，结果仍保留。"
+        },
+        "attn": {
+          "label": "注意力",
+          "note": "每个词读取此前词的结果，因此需要复用已有内存。"
+        },
+        "save": {
+          "label": "节省了多少计算",
+          "note": "比较 5 个示例请求在有无缓存时的 prefill token 计算量。"
+        }
+      },
+      "legend": [
+        [
+          "复用",
+          "--in"
+        ],
+        [
+          "新增计算",
+          "--out"
+        ],
+        [
+          "负值",
+          "--neg"
+        ],
+        [
+          "正值",
+          "--pos"
+        ],
+        [
+          "数据",
+          "--accent"
+        ],
+        [
+          "循环",
+          "--ok"
+        ]
+      ],
+      "objects": {
+        "empty": {
+          "text": "尚无缓存"
+        },
+        "gone": {
+          "text": "最久未用：已移除"
+        },
+        "withB": {
+          "label": "有缓存：32"
+        },
+        "noB": {
+          "label": "无缓存：45"
+        }
+      }
+    },
+    "steps": [
+      {
+        "chapter": "请求到达",
+        "title": "消息变成 token",
+        "cap": "请求 A。每个方块是一个 token。",
+        "plain": "模型先把消息切成称为 <b>token</b> 的小片段。这里用完整单词便于阅读，真实分词器往往切得更细。",
+        "why": "留意前七个方块，下一次请求还会用到它们。",
+        "input": {
+          "label": "你输入的文本"
+        },
+        "transform": {
+          "label": "分词",
+          "text": "输入文本，输出 token 列表。真实分词器为每个 token 分配一个编号。"
+        },
+        "output": {
+          "label": "9 个 token"
+        },
+        "log": [
+          "你",
+          "分词器",
+          "请求 A",
+          "9 token"
+        ]
+      },
+      {
+        "chapter": "请求到达",
+        "title": "加入等待队列",
+        "cap": "请求等待 GPU 空位。",
+        "plain": "调度器维护等待队列，按顺序把请求组合为一个<b>批次</b>，让 GPU 同时处理多个请求。",
+        "input": {
+          "label": "请求 A"
+        },
+        "transform": {
+          "label": "加入队列",
+          "text": "<code>pending_list.append(...)</code>\n\n这时还没有进行模型计算。"
+        },
+        "output": {
+          "label": "等待队列"
+        },
+        "log": [
+          "分词器",
+          "调度器",
+          "请求 A",
+          "9 token"
+        ]
+      },
+      {
+        "chapter": "首次请求：尚无缓存",
+        "title": "这些内容以前计算过吗？",
+        "cap": "计算前，先查找已保存的前缀。",
+        "plain": "<b>前缀</b>就是消息开头。服务端用树记录近期处理过的前缀。首次请求时树为空，因此没有结果可复用。",
+        "input": {
+          "label": "请求 A"
+        },
+        "transform": {
+          "label": "查找除最后一个 token 外的前缀",
+          "text": "<code>match_prefix(input_ids[: input_len - 1])</code>\n\n最后一个 token 总会重算，因为需要它的输出选择下一个词。"
+        },
+        "output": {
+          "label": "命中的 token"
+        },
+        "ask": {
+          "q": "9 个 token 中有多少可以复用？",
+          "options": [
+            "全部 9 个",
+            "8 个，最后一个总要重算",
+            "一个也没有"
+          ],
+          "explain": "树为空，没有结果可复用。"
+        },
+        "log": [
+          "调度器",
+          "前缀树",
+          "查找",
+          "命中 0 个"
+        ]
+      },
+      {
+        "chapter": "首次请求：尚无缓存",
+        "title": "每个 token 都在内存留下结果",
+        "cap": "每一行是一个内存槽位，随计算逐渐填满。",
+        "plain": "模型读取 token 时产生两组数，称为 <b>key 和 value（KV）</b>。它们概括当前 token，供后续 token 使用。每个 token 的结果保存在 GPU 内存的一行中。",
+        "why": "系统要复用的，正是这些已算好的内存行。",
+        "input": {
+          "label": "需要计算的 9 个 token"
+        },
+        "transform": {
+          "label": "执行模型",
+          "text": "小模型为每个 token 生成各含 12 个数的 key 和 value。真实模型会在每一层保存更多结果。"
+        },
+        "output": {
+          "label": "内存中的 key：第 0 至 8 行"
+        },
+        "log": [
+          "模型",
+          "GPU 内存",
+          "key 与 value",
+          "9 槽位"
+        ]
+      },
+      {
+        "chapter": "首次请求：尚无缓存",
+        "title": "后面的词读取前面的词",
+        "cap": "每一行表示当前词关注此前各词的程度。这里权重是随机的。",
+        "plain": "这就是<b>注意力</b>。模型把当前词的 query 与此前各词的 key 比较，再混合它们的 value。先前结果会被反复使用，因此保存它们能省去重复计算。",
+        "why": "空白三角形有实际含义：当前词不能读取未来的词。",
+        "input": {
+          "label": "已保存的 key"
+        },
+        "transform": {
+          "label": "比较，再混合",
+          "text": "query 与已保存的 key 相乘，为此前每个词分配权重。每行合计为 100%。"
+        },
+        "output": {
+          "label": "注意力权重：每行合计为 1"
+        },
+        "log": [
+          "GPU 内存",
+          "注意力",
+          "key 与 value",
+          "1 层"
+        ]
+      },
+      {
+        "chapter": "首次请求：尚无缓存",
+        "title": "回答逐词增长",
+        "cap": "每生成并送回一个词，就增加一行内存。",
+        "plain": "接下来进入循环：模型选一个词，把它送回输入，只计算这个新词，因为此前结果已经保存。这叫 <b>decode</b>；首次处理整个提示词叫 <b>prefill</b>。",
+        "input": {
+          "label": "逐个送回输入"
+        },
+        "transform": {
+          "label": "重复直到完成",
+          "text": "计算 1 个 token，保存 1 行，再选择下一个词。\n\n最后一个生成词没有再送回输入，所以不占新行。"
+        },
+        "output": {
+          "label": "生成的词"
+        },
+        "log": [
+          "模型",
+          "GPU 内存",
+          "解码",
+          "+2 槽位"
+        ]
+      },
+      {
+        "chapter": "首次请求：尚无缓存",
+        "title": "把结果登记到前缀树",
+        "cap": "11 个 token，以及它们对应的内存槽位。",
+        "plain": "请求结束后，token 与它们的内存位置一起登记到树中。回答已发出，计算结果仍留在内存里，供后续请求复用。",
+        "input": {
+          "label": "token 与槽位"
+        },
+        "transform": {
+          "label": "插入前缀树",
+          "text": "<code>insert_prefix(insert_ids, page_indices)</code>"
+        },
+        "output": {
+          "label": "此时的树"
+        },
+        "log": [
+          "调度器",
+          "前缀树",
+          "token → 槽位",
+          "11 token"
+        ]
+      },
+      {
+        "chapter": "第二次请求：复用",
+        "title": "新问题，相同的开头",
+        "cap": "绿色表示见过，橙色表示新增。",
+        "plain": "新问题的开头说明与之前相同，只有结尾不同。聊天应用经常把同一段系统提示词随每条消息一起发送。",
+        "input": {
+          "label": "请求 B"
+        },
+        "transform": {
+          "label": "与请求 A 比较",
+          "text": "前 7 个 token 相同，第 8、9 个不同。"
+        },
+        "output": {
+          "label": "token 列表"
+        },
+        "ask": {
+          "q": "这 9 个 token 中有多少需要新计算？",
+          "options": [
+            "9",
+            "2",
+            "1"
+          ],
+          "explain": "前七个已命中，新增的是 “radix” 与 “tree”。"
+        },
+        "log": [
+          "你",
+          "调度器",
+          "请求 B",
+          "9 token"
+        ]
+      },
+      {
+        "chapter": "第二次请求：复用",
+        "title": "在不同的位置拆分树枝",
+        "cap": "一条分支变成共享主干和两个末端。",
+        "plain": "已保存的分支只有前半段匹配。树在分界处拆开，共享开头留下，分别通向 “KV cache” 与 “radix tree”。内存结果不移动，只修改索引关系。",
+        "why": "这就是 radix tree：每段共享开头只保存一次。",
+        "input": {
+          "label": "拆分前"
+        },
+        "transform": {
+          "label": "在第 7 个位置拆分",
+          "text": "<code>node.split_at(match_len)</code>"
+        },
+        "output": {
+          "label": "拆分后"
+        },
+        "log": [
+          "前缀树",
+          "前缀树",
+          "拆分",
+          "7 + 4"
+        ]
+      },
+      {
+        "chapter": "第二次请求：复用",
+        "title": "指向旧结果，无需重新计算",
+        "cap": "槽位 0 至 6 点亮：请求 B 正在复用它们。",
+        "plain": "每个请求有一张表，记录 token 的内存位置。请求 B 的前七项直接指向请求 A 留下的内存行。无需复制结果，也无需重算；使用中的行会加锁，防止被移除。",
+        "input": {
+          "label": "命中的槽位"
+        },
+        "transform": {
+          "label": "填入位置表",
+          "text": "<code>page_entry.copy_(handle.get_matched_indices())</code>\n\n复制的是槽位编号，而不是计算结果。"
+        },
+        "output": {
+          "label": "请求 B 的位置表"
+        },
+        "log": [
+          "前缀树",
+          "位置表",
+          "槽位编号",
+          "7 项"
+        ]
+      },
+      {
+        "chapter": "第二次请求：复用",
+        "title": "只计算两个新 token",
+        "cap": "只新增两行，结果与重算九个 token 一致。",
+        "plain": "模型只处理两个新 token。自写回放分别计算了缓存版本与从头计算版本，最终数值最大差为 <b>0</b>。在这次因果注意力模拟中，前面 token 的结果保持不变。",
+        "why": "因此第二次请求需要的计算更少。",
+        "input": {
+          "label": "请求 B"
+        },
+        "transform": {
+          "label": "只计算新增部分",
+          "text": "回放以两种方式运行，并比较最终数值。"
+        },
+        "output": {
+          "label": "实际计算的 token"
+        },
+        "log": [
+          "模型",
+          "GPU 内存",
+          "key 与 value",
+          "2 槽位"
+        ]
+      },
+      {
+        "chapter": "边界情况",
+        "title": "两个请求同时到达",
+        "cap": "两者查树时，对方还没有保存结果。",
+        "plain": "C 与 D 共享八个 token，但在同一个批次中到达。它们都只查到 “You are a”，各自计算 6 个 token。之后释放 5 个重复槽位。如果 D 在 C 保存后才到达，就只需计算 1 个。",
+        "why": "同批次请求不会立即共享新增缓存。这是源码阅读与回放的结果，未在 GPU 上验证。",
+        "transform": {
+          "label": "先匹配，再计算，最后保存",
+          "text": "构建批次时完成所有查找；整个批次执行后才保存新结果。"
+        },
+        "output": {
+          "label": "D 计算的 token 数"
+        },
+        "input": {
+          "items": [
+            {
+              "label": "C"
+            },
+            {
+              "label": "D"
+            }
+          ]
+        },
+        "log": [
+          "调度器",
+          "模型",
+          "两个请求",
+          "12 token"
+        ]
+      },
+      {
+        "chapter": "边界情况",
+        "title": "内存满了，移除最久未用的末端",
+        "cap": "只能移除未被任何请求使用的末端。",
+        "plain": "新请求需要 9 个槽位，但只剩 6 个空位。服务端移除最久未用的末端 “KV cache It stores”。使用中的末端通过计数器锁定，因此正在运行的请求不会丢失内存。",
+        "why": "如果请求 A 再次到来，被移除的结尾就需要重算。",
+        "input": {
+          "label": "需求与空位"
+        },
+        "transform": {
+          "label": "移除最久未用的末端",
+          "text": "<code>heapq.heappop(leave_nodes)</code>\n\n移除末端后，它的父节点可能变成新的末端，接着被移除。"
+        },
+        "output": {
+          "label": "移除后的树"
+        },
+        "log": [
+          "前缀树",
+          "空闲列表",
+          "移除的末端",
+          "4 槽位"
+        ]
+      },
+      {
+        "chapter": "结果",
+        "title": "共享开头节省了多少计算",
+        "cap": "比较 5 个请求各自首次计算的 token 数。",
+        "plain": "五个示例请求共计算 <b>32</b> 个 token，而无缓存时需计算 <b>45</b> 个。代理和聊天应用经常重复发送长指令与历史，因此共享前缀可能节省大量重复计算。",
+        "why": "这些数值来自小型模拟，用于解释规则，不是实际速度基准。",
+        "input": {
+          "label": "无缓存"
+        },
+        "transform": {
+          "label": "请求相同，结果相同",
+          "text": "差别仅在模型需要计算多少个 token。"
+        },
+        "output": {
+          "label": "有缓存"
+        },
+        "log": [
+          "全部",
+          "汇总",
+          "计算的 token",
+          "32 vs 45"
+        ]
+      }
+    ]
+  }
+}
